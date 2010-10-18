@@ -30,13 +30,15 @@ import org.apache.mina.common.RuntimeIOException;
 import org.apache.mina.common.TransportType;
 import org.apache.mina.common.support.BaseIoSessionConfig;
 import org.apache.mina.common.support.IoServiceListenerSupport;
-import org.apache.mina.util.Queue;
 
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
+import java.nio.ByteBuffer;
+import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -53,7 +55,7 @@ class MultiThreadSocketSessionImpl extends SocketSessionImpl
     private final MultiThreadSocketIoProcessor ioProcessor;
     private final MultiThreadSocketFilterChain filterChain;
     private final SocketChannel ch;
-    private final Queue writeRequestQueue;
+    private final Queue<WriteRequest> writeRequestQueue;
     private final IoHandler handler;
     private final SocketAddress remoteAddress;
     private final SocketAddress localAddress;
@@ -81,7 +83,7 @@ class MultiThreadSocketSessionImpl extends SocketSessionImpl
         this.ioProcessor = (MultiThreadSocketIoProcessor) ioProcessor;
         this.filterChain = new MultiThreadSocketFilterChain(this);
         this.ch = ch;
-        this.writeRequestQueue = new Queue();
+        this.writeRequestQueue = new ConcurrentLinkedQueue<WriteRequest>();
         this.handler = defaultHandler;
         this.remoteAddress = ch.socket().getRemoteSocketAddress();
         this.localAddress = ch.socket().getLocalSocketAddress();
@@ -218,12 +220,22 @@ class MultiThreadSocketSessionImpl extends SocketSessionImpl
         }
     }
 
+    /**
+     * Returns the sum of the '<tt>remaining</tt>' of all {@link ByteBuffer}s
+     * in the writeRequestQueue queue.
+     *
+     * @throws ClassCastException if an element is not a {@link ByteBuffer}
+     */
     public int getScheduledWriteBytes()
     {
-        synchronized( writeRequestQueue )
+        int byteSize = 0;
+
+        for (WriteRequest request : writeRequestQueue)
         {
-            return writeRequestQueue.byteSize();
+            byteSize += ((ByteBuffer) request.getMessage()).remaining();
         }
+
+        return byteSize;
     }
 
     protected void write0( WriteRequest writeRequest )

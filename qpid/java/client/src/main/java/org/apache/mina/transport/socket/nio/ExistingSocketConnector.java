@@ -19,7 +19,6 @@
  */
 package org.apache.mina.transport.socket.nio;
 
-import edu.emory.mathcs.backport.java.util.concurrent.Executor;
 import org.apache.mina.common.ConnectFuture;
 import org.apache.mina.common.ExceptionMonitor;
 import org.apache.mina.common.IoConnector;
@@ -30,7 +29,6 @@ import org.apache.mina.common.support.BaseIoConnector;
 import org.apache.mina.common.support.DefaultConnectFuture;
 import org.apache.mina.util.NamePreservingRunnable;
 import org.apache.mina.util.NewThreadExecutor;
-import org.apache.mina.util.Queue;
 
 import java.io.IOException;
 import java.net.ConnectException;
@@ -40,7 +38,10 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
+import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Executor;
 
 /**
  * {@link IoConnector} for socket transport (TCP/IP).
@@ -57,7 +58,7 @@ public class ExistingSocketConnector extends BaseIoConnector
     private final int id = nextId++;
     private final String threadName = "SocketConnector-" + id;
     private SocketConnectorConfig defaultConfig = new SocketConnectorConfig();
-    private final Queue connectQueue = new Queue();
+    private final Queue connectQueue = new ConcurrentLinkedQueue();
     private final SocketIoProcessor[] ioProcessors;
     private final int processorCount;
     private final Executor executor;
@@ -205,7 +206,7 @@ public class ExistingSocketConnector extends BaseIoConnector
         {
             selector = Selector.open();
             worker = new Worker();
-            executor.execute(new NamePreservingRunnable(worker));
+            executor.execute(new NamePreservingRunnable(worker, null));
         }
     }
 
@@ -218,11 +219,7 @@ public class ExistingSocketConnector extends BaseIoConnector
 
         for (; ;)
         {
-            ConnectionRequest req;
-            synchronized (connectQueue)
-            {
-                req = (ConnectionRequest) connectQueue.pop();
-            }
+            ConnectionRequest req = (ConnectionRequest) connectQueue.poll();
 
             if (req == null)
             {

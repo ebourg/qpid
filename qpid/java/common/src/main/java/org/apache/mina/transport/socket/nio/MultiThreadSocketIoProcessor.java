@@ -19,8 +19,6 @@
  */
 package org.apache.mina.transport.socket.nio;
 
-import edu.emory.mathcs.backport.java.util.concurrent.Executor;
-import edu.emory.mathcs.backport.java.util.concurrent.locks.ReentrantLock;
 import org.apache.mina.common.ByteBuffer;
 import org.apache.mina.common.ExceptionMonitor;
 import org.apache.mina.common.IdleStatus;
@@ -28,7 +26,6 @@ import org.apache.mina.common.IoFilter.WriteRequest;
 import org.apache.mina.common.WriteTimeoutException;
 import org.apache.mina.util.IdentityHashSet;
 import org.apache.mina.util.NamePreservingRunnable;
-import org.apache.mina.util.Queue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,8 +35,12 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Performs all I/O operations for sockets which is connected or bound. This class is used by MINA internally.
@@ -69,12 +70,12 @@ class MultiThreadSocketIoProcessor extends SocketIoProcessor
     /** @noinspection FieldAccessedSynchronizedAndUnsynchronized */
     private volatile Selector selector, writeSelector;
 
-    private final Queue newSessions = new Queue();
-    private final Queue removingSessions = new Queue();
+    private final Queue newSessions = new ConcurrentLinkedQueue();
+    private final Queue removingSessions = new ConcurrentLinkedQueue();
     private final BlockingQueue flushingSessions = new LinkedBlockingQueue();
     private final IdentityHashSet flushingSessionsSet = new IdentityHashSet();
 
-    private final Queue trafficControllingSessions = new Queue();
+    private final Queue trafficControllingSessions = new ConcurrentLinkedQueue();
 
     private ReadWorker readWorker;
     private WriteWorker writeWorker;
@@ -90,11 +91,8 @@ class MultiThreadSocketIoProcessor extends SocketIoProcessor
 
     void addNew(SocketSessionImpl session) throws IOException
     {
-        synchronized (newSessions)
-        {
-            newSessions.push(session);
-        }
-
+        newSessions.add(session);
+        
         startupWorker();
 
         selector.wakeup();
@@ -116,7 +114,7 @@ class MultiThreadSocketIoProcessor extends SocketIoProcessor
             {
                 selector = Selector.open();
                 readWorker = new ReadWorker();
-                executor.execute(new NamePreservingRunnable(readWorker));
+                executor.execute(new NamePreservingRunnable(readWorker, null));
             }
         }
 
@@ -126,7 +124,7 @@ class MultiThreadSocketIoProcessor extends SocketIoProcessor
             {
                 writeSelector = Selector.open();
                 writeWorker = new WriteWorker();
-                executor.execute(new NamePreservingRunnable(writeWorker));
+                executor.execute(new NamePreservingRunnable(writeWorker, null));
             }
         }
 
@@ -155,10 +153,7 @@ class MultiThreadSocketIoProcessor extends SocketIoProcessor
 
     private void scheduleRemove(SocketSessionImpl session)
     {
-        synchronized (removingSessions)
-        {
-            removingSessions.push(session);
-        }
+        removingSessions.add(session);
     }
 
     private void scheduleFlush(SocketSessionImpl session)
@@ -176,10 +171,7 @@ class MultiThreadSocketIoProcessor extends SocketIoProcessor
 
     private void scheduleTrafficControl(SocketSessionImpl session)
     {
-        synchronized (trafficControllingSessions)
-        {
-            trafficControllingSessions.push(session);
-        }
+        trafficControllingSessions.add(session);
     }
 
     private void doAddNewReader() throws InterruptedException
@@ -191,13 +183,8 @@ class MultiThreadSocketIoProcessor extends SocketIoProcessor
 
         for (; ;)
         {
-            MultiThreadSocketSessionImpl session;
-
-            synchronized (newSessions)
-            {
-                session = (MultiThreadSocketSessionImpl) newSessions.peek();
-            }
-
+            MultiThreadSocketSessionImpl session = (MultiThreadSocketSessionImpl) newSessions.peek();
+            
             if (session == null)
             {
                 break;
@@ -237,12 +224,7 @@ class MultiThreadSocketIoProcessor extends SocketIoProcessor
 
         for (; ;)
         {
-            MultiThreadSocketSessionImpl session;
-
-            synchronized (newSessions)
-            {
-                session = (MultiThreadSocketSessionImpl) newSessions.peek();
-            }
+            MultiThreadSocketSessionImpl session = (MultiThreadSocketSessionImpl) newSessions.peek();
 
             if (session == null)
             {
@@ -286,7 +268,7 @@ class MultiThreadSocketIoProcessor extends SocketIoProcessor
             if (!session.created())
             {
                 _logger.debug("Popping new session");
-                newSessions.pop();
+                newSessions.poll();
 
                 // AbstractIoFilterChain.CONNECT_FUTURE is cleared inside here
                 // in AbstractIoFilterChain.fireSessionOpened().
@@ -306,13 +288,8 @@ class MultiThreadSocketIoProcessor extends SocketIoProcessor
 
         for (; ;)
         {
-            MultiThreadSocketSessionImpl session;
-
-            synchronized (removingSessions)
-            {
-                session = (MultiThreadSocketSessionImpl) removingSessions.pop();
-            }
-
+            MultiThreadSocketSessionImpl session = (MultiThreadSocketSessionImpl) removingSessions.poll();
+            
             if (session == null)
             {
                 break;
@@ -643,7 +620,7 @@ class MultiThreadSocketIoProcessor extends SocketIoProcessor
         //Should this be synchronized?
         synchronized (writeRequestQueue)
         {
-            while ((req = (WriteRequest) writeRequestQueue.pop()) != null)
+            while ((req = (WriteRequest) writeRequestQueue.poll()) != null)
             {
                 try
                 {
@@ -727,7 +704,7 @@ class MultiThreadSocketIoProcessor extends SocketIoProcessor
 
             synchronized (writeRequestQueue)
             {
-                req = (WriteRequest) writeRequestQueue.first();
+                req = (WriteRequest) writeRequestQueue.peek();
             }
 
             if (req == null)
@@ -740,7 +717,7 @@ class MultiThreadSocketIoProcessor extends SocketIoProcessor
             {
                 synchronized (writeRequestQueue)
                 {
-                    writeRequestQueue.pop();
+                    writeRequestQueue.poll();
                 }
 
                 session.increaseWrittenMessages();
@@ -803,9 +780,7 @@ class MultiThreadSocketIoProcessor extends SocketIoProcessor
         {
             for (; ;)
             {
-                MultiThreadSocketSessionImpl session;
-
-                session = (MultiThreadSocketSessionImpl) trafficControllingSessions.pop();
+                MultiThreadSocketSessionImpl session = (MultiThreadSocketSessionImpl) trafficControllingSessions.poll();
 
                 if (session == null)
                 {
