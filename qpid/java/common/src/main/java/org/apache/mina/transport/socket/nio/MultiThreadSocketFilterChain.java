@@ -20,13 +20,13 @@
 package org.apache.mina.transport.socket.nio;
 
 import java.io.IOException;
+import java.util.Queue;
 
 import org.apache.mina.common.ByteBuffer;
 import org.apache.mina.common.IoFilterChain;
 import org.apache.mina.common.IoSession;
 import org.apache.mina.common.IoFilter.WriteRequest;
 import org.apache.mina.common.support.AbstractIoFilterChain;
-import org.apache.mina.util.Queue;
 
 /**
  * An {@link IoFilterChain} for socket transport (TCP/IP).
@@ -50,7 +50,7 @@ class MultiThreadSocketFilterChain extends AbstractIoFilterChain {
         ( ( ByteBuffer ) writeRequest.getMessage() ).mark();
         synchronized( writeRequestQueue )
         {
-            writeRequestQueue.push( writeRequest );
+            writeRequestQueue.add( writeRequest );
             if( writeRequestQueue.size() == 1 && session.getTrafficMask().isWritable() )
             {
                 // Notify SocketIoProcessor only when writeRequestQueue was empty.

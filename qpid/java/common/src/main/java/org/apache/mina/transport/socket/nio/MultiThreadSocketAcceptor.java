@@ -31,17 +31,17 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Executor;
 
 import org.apache.mina.common.ExceptionMonitor;
 import org.apache.mina.common.IoAcceptor;
 import org.apache.mina.common.IoHandler;
 import org.apache.mina.common.IoServiceConfig;
-import org.apache.mina.common.support.BaseIoAcceptor;
-import org.apache.mina.util.Queue;
 import org.apache.mina.util.NewThreadExecutor;
 import org.apache.mina.util.NamePreservingRunnable;
-import edu.emory.mathcs.backport.java.util.concurrent.Executor;
 
 /**
  * {@link IoAcceptor} for socket transport (TCP/IP).
@@ -62,8 +62,8 @@ public class MultiThreadSocketAcceptor extends SocketAcceptor
     private final String threadName = "SocketAcceptor-" + id;
     private final Map channels = new HashMap();
 
-    private final Queue registerQueue = new Queue();
-    private final Queue cancelQueue = new Queue();
+    private final Queue registerQueue = new ConcurrentLinkedQueue();
+    private final Queue cancelQueue = new ConcurrentLinkedQueue();
 
     private final MultiThreadSocketIoProcessor[] ioProcessors;
     private final int processorCount;
@@ -132,10 +132,7 @@ public class MultiThreadSocketAcceptor extends SocketAcceptor
 
         RegistrationRequest request = new RegistrationRequest( address, handler, config );
 
-        synchronized( registerQueue )
-        {
-            registerQueue.push( request );
-        }
+        registerQueue.add( request );
 
         startupWorker();
 
@@ -172,7 +169,7 @@ public class MultiThreadSocketAcceptor extends SocketAcceptor
                 selector = Selector.open();
                 worker = new Worker();
 
-                executor.execute( new NamePreservingRunnable( worker ) );
+                executor.execute( new NamePreservingRunnable( worker, null ) );
             }
         }
     }
@@ -199,10 +196,7 @@ public class MultiThreadSocketAcceptor extends SocketAcceptor
             throw new IllegalArgumentException( "Address not bound: " + address );
         }
 
-        synchronized( cancelQueue )
-        {
-            cancelQueue.push( request );
-        }
+        cancelQueue.add( request );
 
         selector.wakeup();
 
@@ -368,13 +362,8 @@ public class MultiThreadSocketAcceptor extends SocketAcceptor
 
         for( ; ; )
         {
-            RegistrationRequest req;
-
-            synchronized( registerQueue )
-            {
-                req = ( RegistrationRequest ) registerQueue.pop();
-            }
-
+            RegistrationRequest req = ( RegistrationRequest ) registerQueue.poll();
+            
             if( req == null )
             {
                 break;
@@ -456,13 +445,8 @@ public class MultiThreadSocketAcceptor extends SocketAcceptor
 
         for( ; ; )
         {
-            CancellationRequest request;
-
-            synchronized( cancelQueue )
-            {
-                request = ( CancellationRequest ) cancelQueue.pop();
-            }
-
+            CancellationRequest request = ( CancellationRequest ) cancelQueue.poll();
+            
             if( request == null )
             {
                 break;
