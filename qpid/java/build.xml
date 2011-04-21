@@ -25,7 +25,7 @@
 
   <property name="modules.core"       value="junit-toolkit common client tools"/>
   <property name="modules.examples"   value="client/example"/>
-  <property name="modules.tests"      value="systests perftests integrationtests testkit"/>
+  <property name="modules.tests"      value="systests integrationtests testkit"/>
   <property name="modules"            value="${modules.core} ${modules.examples} ${modules.tests}"/>
 
   <property name="qpid.jar"           location="${build.lib}/qpid-all.jar"/>
