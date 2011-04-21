@@ -21,23 +21,9 @@
 
 package org.apache.qpid.client.message;
 
-import org.apache.mina.common.ByteBuffer;
-import org.apache.qpid.framing.BasicContentHeaderProperties;
-import org.apache.qpid.framing.AMQShortString;
-import org.apache.qpid.AMQException;
-
 public interface AMQMessageDelegateFactory<D extends AMQMessageDelegate>
 {
     public static AMQMessageDelegateFactory DEFAULT_FACTORY = null;
-
-    public static AMQMessageDelegateFactory<AMQMessageDelegate_0_8> FACTORY_0_8 =
-            new AMQMessageDelegateFactory<AMQMessageDelegate_0_8>()
-            {
-                public AMQMessageDelegate_0_8 createDelegate()
-                {
-                    return new AMQMessageDelegate_0_8();
-                }
-            };
 
     public static AMQMessageDelegateFactory<AMQMessageDelegate_0_10> FACTORY_0_10 =
             new AMQMessageDelegateFactory<AMQMessageDelegate_0_10>()

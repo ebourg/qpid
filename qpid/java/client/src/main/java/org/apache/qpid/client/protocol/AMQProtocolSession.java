@@ -35,11 +35,9 @@ import org.apache.qpid.client.ConnectionTuneParameters;
 import org.apache.qpid.client.message.UnprocessedMessage;
 import org.apache.qpid.client.message.UnprocessedMessage_0_8;
 import org.apache.qpid.client.state.AMQStateManager;
-import org.apache.qpid.client.state.AMQState;
 import org.apache.qpid.framing.*;
 import org.apache.qpid.protocol.AMQConstant;
 import org.apache.qpid.protocol.AMQVersionAwareProtocolSession;
-import org.apache.qpid.transport.Sender;
 import org.apache.qpid.client.handler.ClientMethodDispatcherImpl;
 
 /**
@@ -111,13 +109,6 @@ public class AMQProtocolSession implements AMQVersionAwareProtocolSession
         _methodDispatcher = ClientMethodDispatcherImpl.newMethodDispatcher(ProtocolVersion.getLatestSupportedVersion(),
                                                                            this);
         _connection = connection;
-    }
-
-    public void init()
-    {
-        // start the process of setting up the connection. This is the first place that
-        // data is written to the server.
-        _protocolHandler.writeFrame(new ProtocolInitiation(_connection.getProtocolVersion()));
     }
 
     public String getClientID()
@@ -373,11 +364,6 @@ public class AMQProtocolSession implements AMQVersionAwareProtocolSession
         return _connection;
     }
 
-    public void closeProtocolSession() throws AMQException
-    {
-        _protocolHandler.closeConnection(0);
-    }
-
     public void failover(String host, int port)
     {
         _protocolHandler.failover(host, port);
@@ -442,11 +428,6 @@ public class AMQProtocolSession implements AMQVersionAwareProtocolSession
         session.setTicket(ticket);
     }
 
-    public void setMethodDispatcher(MethodDispatcher methodDispatcher)
-    {
-        _methodDispatcher = methodDispatcher;
-    }
-
     public void setFlowControl(final int channelId, final boolean active)
     {
         final AMQSession session = getSession(channelId);
@@ -461,11 +442,6 @@ public class AMQProtocolSession implements AMQVersionAwareProtocolSession
     public void notifyError(Exception error)
     {
         _protocolHandler.propagateExceptionToAllWaiters(error);
-    }
-
-    public void setSender(Sender<java.nio.ByteBuffer> sender)
-    {
-        // No-op, interface munging
     }
 
 

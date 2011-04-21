@@ -56,10 +56,10 @@ public class ProtocolInitiation extends AMQDataBlock implements EncodableAMQData
     public ProtocolInitiation(ProtocolVersion pv)
     {
         this(AMQP_HEADER,
-             pv.equals(ProtocolVersion.v0_91) ? 0 : CURRENT_PROTOCOL_CLASS,
-             pv.equals(ProtocolVersion.v0_91) ? 0 : TCP_PROTOCOL_INSTANCE,
-             pv.equals(ProtocolVersion.v0_91) ? 9 : pv.getMajorVersion(),
-             pv.equals(ProtocolVersion.v0_91) ? 1 : pv.getMinorVersion());
+             CURRENT_PROTOCOL_CLASS,
+             TCP_PROTOCOL_INSTANCE,
+             pv.getMajorVersion(),
+             pv.getMinorVersion());
     }
 
     public ProtocolInitiation(ByteBuffer in)
@@ -175,17 +175,7 @@ public class ProtocolInitiation extends AMQDataBlock implements EncodableAMQData
 
         ProtocolVersion pv;
 
-        // Hack for 0-9-1 which changed how the header was defined
-        if(_protocolInstance == 0 && _protocolMajor == 9 && _protocolMinor == 1)
-        {
-            pv = ProtocolVersion.v0_91;
-            if (_protocolClass != 0)
-            {
-                throw new AMQProtocolClassException("Protocol class " + 0 + " was expected; received " +
-                                                    _protocolClass, null);
-            }
-        }
-        else if (_protocolClass != CURRENT_PROTOCOL_CLASS)
+        if (_protocolClass != CURRENT_PROTOCOL_CLASS)
         {
             throw new AMQProtocolClassException("Protocol class " + CURRENT_PROTOCOL_CLASS + " was expected; received " +
                                                 _protocolClass, null);

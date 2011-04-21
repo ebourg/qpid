@@ -51,8 +51,6 @@ import org.apache.qpid.framing.AMQDataBlock;
 import org.apache.qpid.framing.AMQFrame;
 import org.apache.qpid.framing.AMQMethodBody;
 import org.apache.qpid.framing.AMQShortString;
-import org.apache.qpid.framing.ConnectionCloseBody;
-import org.apache.qpid.framing.ConnectionCloseOkBody;
 import org.apache.qpid.framing.HeartbeatBody;
 import org.apache.qpid.framing.MethodRegistry;
 import org.apache.qpid.framing.ProtocolInitiation;
@@ -208,21 +206,6 @@ public class AMQProtocolHandler implements ProtocolEngine
         _writeJob = new Job(_poolReference, Job.MAX_JOB_EVENTS, false);
         _poolReference.acquireExecutorService();
         _failoverHandler = new FailoverHandler(this);
-    }
-
-    /**
-     * Called when we want to create a new IoTransport session
-     * @param brokerDetail
-     */
-    public void createIoTransportSession(BrokerDetails brokerDetail)
-    {
-        _protocolSession = new AMQProtocolSession(this, _connection);
-        _stateManager.setProtocolSession(_protocolSession);
-        IoTransport.connect_0_9(getProtocolSession(),
-                                brokerDetail.getHost(),
-                                brokerDetail.getPort(),
-                                brokerDetail.getBooleanProperty(BrokerDetails.OPTIONS_SSL));
-        _protocolSession.init();
     }
 
     /**
@@ -699,44 +682,6 @@ public class AMQProtocolHandler implements ProtocolEngine
     public void closeSession(AMQSession session) throws AMQException
     {
         _protocolSession.closeSession(session);
-    }
-
-    /**
-     * Closes the connection.
-     *
-     * <p/>If a failover exception occurs whilst closing the connection it is ignored, as the connection is closed
-     * anyway.
-     *
-     * @param timeout The timeout to wait for an acknowledgement to the close request.
-     *
-     * @throws AMQException If the close fails for any reason.
-     */
-    public void closeConnection(long timeout) throws AMQException
-    {
-        ConnectionCloseBody body = _protocolSession.getMethodRegistry().createConnectionCloseBody(AMQConstant.REPLY_SUCCESS.getCode(), // replyCode
-                                                                                                  new AMQShortString("JMS client is closing the connection."), 0, 0);
-
-        final AMQFrame frame = body.generateFrame(0);
-
-        //If the connection is already closed then don't do a syncWrite
-        if (!getStateManager().getCurrentState().equals(AMQState.CONNECTION_CLOSED))
-        {
-            try
-            {
-                syncWrite(frame, ConnectionCloseOkBody.class, timeout);
-                _networkDriver.close();
-                closed();
-            }
-            catch (AMQTimeoutException e)
-            {
-                closed();
-            }
-            catch (FailoverException e)
-            {
-                _logger.debug("FailoverException interrupted connection close, ignoring as connection   close anyway.");
-            }
-        }
-        _poolReference.releaseExecutorService();
     }
 
     /** @return the number of bytes read from this protocol session */

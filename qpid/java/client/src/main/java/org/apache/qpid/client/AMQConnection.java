@@ -62,13 +62,7 @@ import org.apache.qpid.client.protocol.AMQProtocolHandler;
 import org.apache.qpid.configuration.ClientProperties;
 import org.apache.qpid.exchange.ExchangeDefaults;
 import org.apache.qpid.framing.AMQShortString;
-import org.apache.qpid.framing.BasicQosBody;
-import org.apache.qpid.framing.BasicQosOkBody;
-import org.apache.qpid.framing.ChannelOpenBody;
-import org.apache.qpid.framing.ChannelOpenOkBody;
 import org.apache.qpid.framing.ProtocolVersion;
-import org.apache.qpid.framing.TxSelectBody;
-import org.apache.qpid.framing.TxSelectOkBody;
 import org.apache.qpid.jms.BrokerDetails;
 import org.apache.qpid.jms.Connection;
 import org.apache.qpid.jms.ConnectionListener;
@@ -323,22 +317,7 @@ public class AMQConnection extends Closeable implements Connection, QueueConnect
         
         _failoverPolicy = new FailoverPolicy(connectionURL, this);
         BrokerDetails brokerDetails = _failoverPolicy.getCurrentBrokerDetails();
-        if (brokerDetails.getTransport().equals(BrokerDetails.VM) || "0-8".equals(amqpVersion)) 
-        {
-            _delegate = new AMQConnectionDelegate_8_0(this);
-        } 
-        else if ("0-9".equals(amqpVersion))
-        {
-            _delegate = new AMQConnectionDelegate_0_9(this);
-        }
-        else if ("0-91".equals(amqpVersion) || "0-9-1".equals(amqpVersion))
-        {
-            _delegate = new AMQConnectionDelegate_9_1(this);
-        }
-        else
-        {
-            _delegate = new AMQConnectionDelegate_0_10(this);
-        }
+        _delegate = new AMQConnectionDelegate_0_10(this);
 
         if (_logger.isInfoEnabled())
         {
@@ -663,50 +642,6 @@ public class AMQConnection extends Closeable implements Connection, QueueConnect
         {
             checkNotClosed();
             return _delegate.createSession(transacted, acknowledgeMode, prefetchHigh, prefetchLow);
-        }
-    }
-
-    private void createChannelOverWire(int channelId, int prefetchHigh, int prefetchLow, boolean transacted)
-            throws AMQException, FailoverException
-    {
-
-        ChannelOpenBody channelOpenBody = getProtocolHandler().getMethodRegistry().createChannelOpenBody(null);
-
-        // TODO: Be aware of possible changes to parameter order as versions change.
-
-        _protocolHandler.syncWrite(channelOpenBody.generateFrame(channelId), ChannelOpenOkBody.class);
-
-        BasicQosBody basicQosBody = getProtocolHandler().getMethodRegistry().createBasicQosBody(0, prefetchHigh, false);
-
-        // todo send low water mark when protocol allows.
-        // todo Be aware of possible changes to parameter order as versions change.
-        _protocolHandler.syncWrite(basicQosBody.generateFrame(channelId), BasicQosOkBody.class);
-
-        if (transacted)
-        {
-            if (_logger.isDebugEnabled())
-            {
-                _logger.debug("Issuing TxSelect for " + channelId);
-            }
-
-            TxSelectBody body = getProtocolHandler().getMethodRegistry().createTxSelectBody();
-
-            // TODO: Be aware of possible changes to parameter order as versions change.
-            _protocolHandler.syncWrite(body.generateFrame(channelId), TxSelectOkBody.class);
-        }
-    }
-
-    private void reopenChannel(int channelId, int prefetchHigh, int prefetchLow, boolean transacted)
-            throws AMQException, FailoverException
-    {
-        try
-        {
-            createChannelOverWire(channelId, prefetchHigh, prefetchLow, transacted);
-        }
-        catch (AMQException e)
-        {
-            deregisterSession(channelId);
-            throw new AMQException(null, "Error reopening channel " + channelId + " after failover: " + e, e);
         }
     }
 

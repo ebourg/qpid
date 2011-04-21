@@ -58,7 +58,4 @@ public interface AMQVersionAwareProtocolSession extends AMQProtocolWriter, Proto
     public void heartbeatBodyReceived(int channelId, HeartbeatBody body) throws AMQException;
 
 
-    public void setSender(Sender<ByteBuffer> sender);
-    public void init();
-
 }

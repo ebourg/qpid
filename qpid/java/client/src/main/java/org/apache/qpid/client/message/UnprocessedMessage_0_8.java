@@ -25,7 +25,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.qpid.framing.AMQShortString;
-import org.apache.qpid.framing.BasicDeliverBody;
 import org.apache.qpid.framing.ContentBody;
 import org.apache.qpid.framing.ContentHeaderBody;
 
@@ -41,12 +40,9 @@ public class UnprocessedMessage_0_8 extends UnprocessedMessage
     private long _bytesReceived = 0;
 
 
-    private AMQShortString _exchange;
-    private AMQShortString _routingKey;
     private final long _deliveryId;
     protected boolean _redelivered;
 
-    private BasicDeliverBody _deliverBody;
     private ContentHeaderBody _contentHeader;
 
     /** List of ContentBody instances. Due to fragmentation you don't know how big this will be in general */
@@ -55,32 +51,15 @@ public class UnprocessedMessage_0_8 extends UnprocessedMessage
     public UnprocessedMessage_0_8(long deliveryId, int consumerTag, AMQShortString exchange, AMQShortString routingKey, boolean redelivered)
     {
         super(consumerTag);
-        _exchange = exchange;
-        _routingKey = routingKey;
 
         _redelivered = redelivered;
         _deliveryId = deliveryId;
     }
 
 
-    public AMQShortString getExchange()
-    {
-        return _exchange;
-    }
-
-    public AMQShortString getRoutingKey()
-    {
-        return _routingKey;
-    }
-
     public long getDeliveryTag()
     {
         return _deliveryId;
-    }
-
-    public boolean isRedelivered()
-    {
-        return _redelivered;
     }
 
 
@@ -112,11 +91,6 @@ public class UnprocessedMessage_0_8 extends UnprocessedMessage
         }
     }
 
-    public void setMethodBody(BasicDeliverBody deliverBody)
-    {
-        _deliverBody = deliverBody;
-    }
-
     public void setContentHeader(ContentHeaderBody contentHeader)
     {
         this._contentHeader = contentHeader;
@@ -127,19 +101,9 @@ public class UnprocessedMessage_0_8 extends UnprocessedMessage
         return _bytesReceived == getContentHeader().bodySize;
     }
 
-    public BasicDeliverBody getDeliverBody()
-    {
-        return _deliverBody;
-    }
-
     public ContentHeaderBody getContentHeader()
     {
         return _contentHeader;
-    }
-
-    public List<ContentBody> getBodies()
-    {
-        return _bodies;
     }
 
     public String toString()
@@ -149,12 +113,6 @@ public class UnprocessedMessage_0_8 extends UnprocessedMessage
         if (_contentHeader != null)
         {
           buf.append("ContentHeader " + _contentHeader);
-        }
-        if(_deliverBody != null)
-        {
-            buf.append("Delivery tag " + _deliverBody.getDeliveryTag());
-            buf.append("Consumer tag " + _deliverBody.getConsumerTag());
-            buf.append("Deliver Body " + _deliverBody);
         }
 
         return buf.toString();

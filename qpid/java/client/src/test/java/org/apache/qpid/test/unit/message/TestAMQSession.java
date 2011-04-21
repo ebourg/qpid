@@ -32,7 +32,7 @@ import javax.jms.*;
 
 import java.util.Map;
 
-public class TestAMQSession extends AMQSession<BasicMessageConsumer_0_8, BasicMessageProducer_0_8>
+public class TestAMQSession extends AMQSession<BasicMessageConsumer_0_10, BasicMessageProducer_0_10>
 {
 
     public TestAMQSession()
@@ -97,7 +97,7 @@ public class TestAMQSession extends AMQSession<BasicMessageConsumer_0_8, BasicMe
 
     }
 
-    public BasicMessageConsumer_0_8 createMessageConsumer(AMQDestination destination, int prefetchHigh, int prefetchLow, boolean noLocal, boolean exclusive, String selector, FieldTable arguments, boolean noConsume, boolean autoClose) throws JMSException
+    public BasicMessageConsumer_0_10 createMessageConsumer(AMQDestination destination, int prefetchHigh, int prefetchLow, boolean noLocal, boolean exclusive, String selector, FieldTable arguments, boolean noConsume, boolean autoClose) throws JMSException
     {
         return null;
     }
@@ -112,12 +112,12 @@ public class TestAMQSession extends AMQSession<BasicMessageConsumer_0_8, BasicMe
         return false;
     }
 
-    public void sendConsume(BasicMessageConsumer_0_8 consumer, AMQShortString queueName, AMQProtocolHandler protocolHandler, boolean nowait, String messageSelector, int tag) throws AMQException, FailoverException
+    public void sendConsume(BasicMessageConsumer_0_10 consumer, AMQShortString queueName, AMQProtocolHandler protocolHandler, boolean nowait, String messageSelector, int tag) throws AMQException, FailoverException
     {
 
     }
 
-    public BasicMessageProducer_0_8 createMessageProducer(Destination destination, boolean mandatory, boolean immediate, boolean waitUntilSent, long producerId)
+    public BasicMessageProducer_0_10 createMessageProducer(Destination destination, boolean mandatory, boolean immediate, boolean waitUntilSent, long producerId)
     {
         return null;
     }
@@ -160,7 +160,7 @@ public class TestAMQSession extends AMQSession<BasicMessageConsumer_0_8, BasicMe
 
     public AMQMessageDelegateFactory getMessageDelegateFactory()
     {
-        return AMQMessageDelegateFactory.FACTORY_0_8;
+        return AMQMessageDelegateFactory.FACTORY_0_10;
     }
 
     protected Object getFailoverMutex()

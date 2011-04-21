@@ -53,13 +53,13 @@ public class MessageConverterTest extends TestCase
     protected void setUp() throws Exception
     {
         super.setUp();
-        testTextMessage = new JMSTextMessage(AMQMessageDelegateFactory.FACTORY_0_8);
+        testTextMessage = new JMSTextMessage(AMQMessageDelegateFactory.FACTORY_0_10);
 
         //Set Message Text
         testTextMessage.setText("testTextMessage text");
         setMessageProperties(testTextMessage);
 
-        testMapMessage = new JMSMapMessage(AMQMessageDelegateFactory.FACTORY_0_8);
+        testMapMessage = new JMSMapMessage(AMQMessageDelegateFactory.FACTORY_0_10);
         testMapMessage.setString("testMapString", "testMapStringValue");
         testMapMessage.setDouble("testMapDouble", Double.MAX_VALUE);
     }

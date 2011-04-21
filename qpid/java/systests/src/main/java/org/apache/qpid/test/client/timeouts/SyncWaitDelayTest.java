@@ -31,8 +31,6 @@ import javax.jms.Queue;
 import javax.jms.Session;
 
 import org.apache.commons.configuration.XMLConfiguration;
-import org.apache.qpid.server.registry.ApplicationRegistry;
-import org.apache.qpid.server.registry.ConfigurationFileApplicationRegistry;
 import org.apache.qpid.test.utils.QpidBrokerTestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

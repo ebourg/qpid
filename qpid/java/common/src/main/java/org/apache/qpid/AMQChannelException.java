@@ -51,9 +51,4 @@ public class AMQChannelException extends AMQException
         this.minor = minor;
     }
 
-    public AMQFrame getCloseFrame(int channel)
-    {
-        MethodRegistry reg = MethodRegistry.getMethodRegistry(new ProtocolVersion(major,minor));
-        return new AMQFrame(channel, reg.createChannelCloseBody(getErrorCode() == null ? AMQConstant.INTERNAL_ERROR.getCode() : getErrorCode().getCode(), new AMQShortString(getMessage()),_classId,_methodId));
-    }
 }

@@ -23,7 +23,6 @@ package org.apache.qpid.test.unit.client.connection;
 import org.apache.qpid.AMQConnectionFailureException;
 import org.apache.qpid.AMQException;
 import org.apache.qpid.AMQUnresolvedAddressException;
-import org.apache.qpid.server.exchange.Exchange;
 import org.apache.qpid.test.utils.QpidBrokerTestCase;
 import org.apache.qpid.client.AMQAuthenticationException;
 import org.apache.qpid.client.AMQConnection;

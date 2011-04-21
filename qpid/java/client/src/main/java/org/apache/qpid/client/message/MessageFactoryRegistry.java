@@ -30,7 +30,6 @@ import javax.jms.JMSException;
 import org.apache.qpid.AMQException;
 import org.apache.qpid.framing.AMQShortString;
 import org.apache.qpid.framing.BasicContentHeaderProperties;
-import org.apache.qpid.framing.ContentHeaderBody;
 import org.apache.qpid.transport.Struct;
 import org.apache.qpid.transport.MessageProperties;
 import org.apache.qpid.transport.MessageTransfer;
@@ -87,38 +86,6 @@ public class MessageFactoryRegistry
         _mimeShortStringToFactoryMap.remove(new AMQShortString(mimeType));
 
         return _mimeStringToFactoryMap.remove(mimeType);
-    }
-
-    /**
-     * Create a message. This looks up the MIME type from the content header and instantiates the appropriate
-     * concrete message type.
-     *
-     * @param deliveryTag   the AMQ message id
-     * @param redelivered   true if redelivered
-     * @param contentHeader the content header that was received
-     * @param bodies        a list of ContentBody instances @return the message.
-     * @throws AMQException
-     * @throws JMSException
-     */
-    public AbstractJMSMessage createMessage(long deliveryTag, boolean redelivered, AMQShortString exchange,
-                                            AMQShortString routingKey, ContentHeaderBody contentHeader, List bodies)
-            throws AMQException, JMSException
-    {
-        BasicContentHeaderProperties properties = (BasicContentHeaderProperties) contentHeader.getProperties();
-
-        // Get the message content type. This may be null for pure AMQP messages, but will always be set for JMS over
-        // AMQP. When the type is null, it can only be assumed that the message is a byte message.
-        AMQShortString contentTypeShortString = properties.getContentType();
-        contentTypeShortString = (contentTypeShortString == null) ? new AMQShortString(
-                JMSBytesMessage.MIME_TYPE) : contentTypeShortString;
-
-        MessageFactory mf = _mimeShortStringToFactoryMap.get(contentTypeShortString);
-        if (mf == null)
-        {
-            mf = _default;
-        }
-
-        return mf.createMessage(deliveryTag, redelivered, contentHeader, exchange, routingKey, bodies);
     }
 
     public AbstractJMSMessage createMessage(MessageTransfer transfer) throws AMQException, JMSException

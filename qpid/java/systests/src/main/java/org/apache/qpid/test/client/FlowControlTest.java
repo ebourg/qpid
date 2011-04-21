@@ -20,8 +20,8 @@
 */
 package org.apache.qpid.test.client;
 
-import org.apache.qpid.client.AMQSession_0_8;
 import org.apache.qpid.client.message.AbstractJMSMessage;
+import org.apache.qpid.client.AMQSession_0_10;
 import org.apache.qpid.test.utils.QpidBrokerTestCase;
 import org.apache.log4j.Logger;
 
@@ -80,7 +80,6 @@ public class FlowControlTest extends QpidBrokerTestCase
 
         Connection consumerConnection = getConnection();
         Session consumerSession = consumerConnection.createSession(false, Session.CLIENT_ACKNOWLEDGE);
-        ((AMQSession_0_8) consumerSession).setPrefetchLimits(0, 256);
         MessageConsumer recv = consumerSession.createConsumer(_queue);
         consumerConnection.start();
 
@@ -150,7 +149,6 @@ public class FlowControlTest extends QpidBrokerTestCase
 
         Connection consumerConnection = getConnection();
         Session consumerSession1 = consumerConnection.createSession(false, Session.CLIENT_ACKNOWLEDGE);
-        ((AMQSession_0_8) consumerSession1).setPrefetchLimits(0, 256);
         MessageConsumer recv1 = consumerSession1.createConsumer(_queue);
 
         consumerConnection.start();
@@ -163,7 +161,6 @@ public class FlowControlTest extends QpidBrokerTestCase
         assertNull("Second message incorrectly delivered", r2);
 
         Session consumerSession2 = consumerConnection.createSession(false, Session.CLIENT_ACKNOWLEDGE);
-        ((AMQSession_0_8) consumerSession2).setPrefetchLimits(0, 256);
         MessageConsumer recv2 = consumerSession2.createConsumer(_queue);
 
         r2 = recv2.receive(RECEIVE_TIMEOUT);

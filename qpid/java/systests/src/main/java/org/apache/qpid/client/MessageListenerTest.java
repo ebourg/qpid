@@ -20,7 +20,6 @@
  */
 package org.apache.qpid.client;
 
-import org.apache.qpid.server.configuration.ServerConfiguration;
 import org.apache.qpid.test.utils.QpidBrokerTestCase;
 import org.apache.qpid.util.LogMonitor;
 

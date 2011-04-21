@@ -62,10 +62,6 @@ import org.apache.qpid.exchange.ExchangeDefaults;
 import org.apache.qpid.jms.BrokerDetails;
 import org.apache.qpid.jms.ConnectionURL;
 import org.apache.qpid.management.common.mbeans.ConfigurationManagement;
-import org.apache.qpid.server.configuration.ServerConfiguration;
-import org.apache.qpid.server.registry.ApplicationRegistry;
-import org.apache.qpid.server.registry.ConfigurationFileApplicationRegistry;
-import org.apache.qpid.server.store.DerbyMessageStore;
 import org.apache.qpid.url.URLSyntaxException;
 import org.apache.qpid.util.FileUtils;
 import org.apache.qpid.util.LogMonitor;
@@ -124,21 +120,19 @@ public class QpidBrokerTestCase extends QpidTestCase
     protected static final String CPP = "cpp";
     protected static final String VM = "vm";
     protected static final String EXTERNAL = "external";
-    private static final String VERSION_08 = "0-8";
     private static final String VERSION_010 = "0-10";
 
     protected static final String QPID_HOME = "QPID_HOME";
 
     public static final int DEFAULT_VM_PORT = 1;
-    public static final int DEFAULT_PORT = Integer.getInteger("test.port", ServerConfiguration.DEFAULT_PORT);
-    public static final int DEFAULT_MANAGEMENT_PORT = Integer.getInteger("test.mport", ServerConfiguration.DEFAULT_JMXPORT);
-    public static final int DEFAULT_SSL_PORT = Integer.getInteger("test.sslport", ServerConfiguration.DEFAULT_SSL_PORT);
+    public static final int DEFAULT_PORT = 5672;
+    public static final int DEFAULT_MANAGEMENT_PORT = 9099;
 
     protected String _brokerLanguage = System.getProperty(BROKER_LANGUAGE, JAVA);
     protected String _broker = System.getProperty(BROKER, VM);
     private String _brokerClean = System.getProperty(BROKER_CLEAN, null);
     private Boolean _brokerCleanBetweenTests = Boolean.getBoolean(BROKER_CLEAN_BETWEEN_TESTS);
-    private String _brokerVersion = System.getProperty(BROKER_VERSION, VERSION_08);
+    private String _brokerVersion = System.getProperty(BROKER_VERSION, VERSION_010);
     protected String _output = System.getProperty(TEST_OUTPUT);
     protected Boolean _brokerPersistent = Boolean.getBoolean(BROKER_PERSITENT);
 
@@ -456,34 +450,7 @@ public class QpidBrokerTestCase extends QpidTestCase
         saveTestVirtualhosts();
 
         Process process = null;
-        if (_broker.equals(VM))
-        {
-            setConfigurationProperty("management.jmxport", String.valueOf(getManagementPort(port)));
-            setConfigurationProperty(ServerConfiguration.MGMT_CUSTOM_REGISTRY_SOCKET, String.valueOf(false));
-            saveTestConfiguration();
-            
-            // create an in_VM broker
-            final ConfigurationFileApplicationRegistry registry = new ConfigurationFileApplicationRegistry(_configFile);
-            try
-            {
-                ApplicationRegistry.initialise(registry, port);
-            }
-            catch (Exception e)
-            {
-                _logger.error("Broker initialise failed due to:",e);
-                try
-                {
-                    registry.close();
-                }
-                catch (Throwable closeE)
-                {
-                    closeE.printStackTrace();
-                }
-                throw e;
-            }
-            TransportConnection.createVMBroker(port);
-        }
-        else if (!_broker.equals(EXTERNAL))
+        if (!_broker.equals(EXTERNAL))
         {
             String cmd = getBrokerCommand(port);
             _logger.info("starting broker: " + cmd);
@@ -689,65 +656,6 @@ public class QpidBrokerTestCase extends QpidTestCase
             process.waitFor();
             _logger.info("broker exited: " + process.exitValue());
         }
-        else if (_broker.equals(VM))
-        {
-            TransportConnection.killVMBroker(port);
-            ApplicationRegistry.remove(port);
-        }
-    }
-
-    /**
-     * Attempt to set the Java Broker to use the BDBMessageStore for persistence
-     * Falling back to the DerbyMessageStore if
-     *
-     * @param virtualhost - The virtualhost to modify
-     *
-     * @throws ConfigurationException - when reading/writing existing configuration
-     * @throws IOException            - When creating a temporary file.
-     */
-    protected void makeVirtualHostPersistent(String virtualhost)
-            throws ConfigurationException, IOException
-    {
-        Class<?> storeClass = null;
-        try
-        {
-            // Try and lookup the BDB class
-            storeClass = Class.forName("org.apache.qpid.server.store.berkeleydb.BDBMessageStore");
-        }
-        catch (ClassNotFoundException e)
-        {
-            // No BDB store, we'll use Derby instead.
-            storeClass = DerbyMessageStore.class;
-        }
-
-
-        setConfigurationProperty("virtualhosts.virtualhost." + virtualhost + ".store.class",
-                                    storeClass.getName());
-        setConfigurationProperty("virtualhosts.virtualhost." + virtualhost + ".store." + DerbyMessageStore.ENVIRONMENT_PATH_PROPERTY,
-                                   "${QPID_WORK}/" + virtualhost);
-    }
-
-    /**
-     * Get a property value from the current configuration file.
-     *
-     * @param property the property to lookup
-     *
-     * @return the requested String Value
-     *
-     * @throws org.apache.commons.configuration.ConfigurationException
-     *
-     */
-    protected String getConfigurationStringProperty(String property) throws ConfigurationException
-    {
-        // Call save Configuration to be sure we have saved the test specific
-        // file. As the optional status
-        saveTestConfiguration();
-        saveTestVirtualhosts();
-
-        ServerConfiguration configuration = new ServerConfiguration(_configFile);
-        // Don't need to configuration.configure() here as we are just pulling
-        // values directly by String.
-        return configuration.getConfig().getString(property);
     }
 
     /**
@@ -930,7 +838,7 @@ public class QpidBrokerTestCase extends QpidTestCase
      */
     public boolean isBroker08()
     {
-        return _brokerVersion.equals(VERSION_08);
+        return false;
     }
 
     public boolean isBroker010()
@@ -1328,36 +1236,4 @@ public class QpidBrokerTestCase extends QpidTestCase
         return null;
     }
 
-    /**
-     * Reloads the broker security configuration using the ApplicationRegistry (InVM brokers) or the
-     * ConfigurationManagementMBean via the JMX interface (Standalone brokers, management must be 
-     * enabled before calling the method).
-     */
-    public void reloadBrokerSecurityConfig() throws Exception
-    {
-        if (_broker.equals(VM))
-        {
-            ApplicationRegistry.getInstance().getConfiguration().reparseConfigFileSecuritySections();
-        }
-        else
-        {
-            JMXTestUtils jmxu = new JMXTestUtils(this, "admin" , "admin");
-            jmxu.open();
-            
-            try
-            {
-                ConfigurationManagement configMBean = jmxu.getConfigurationManagement();
-                configMBean.reloadSecurityConfiguration();
-            }
-            finally
-            {
-                jmxu.close();
-            }
-            
-            LogMonitor _monitor = new LogMonitor(_outputFile);
-            assertTrue("The expected server security configuration reload did not occur",
-                    _monitor.waitForMessage(ServerConfiguration.SECURITY_CONFIG_RELOADED, LOGMONITOR_TIMEOUT));
-
-        }
-    }
 }

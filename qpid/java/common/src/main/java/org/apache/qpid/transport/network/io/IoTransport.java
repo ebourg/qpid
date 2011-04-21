@@ -150,35 +150,6 @@ public final class IoTransport<E> implements IoContext
         return connect(host, port, ConnectionBinding.get(delegate),ssl);
     }
 
-    public static void connect_0_9(AMQVersionAwareProtocolSession session, String host, int port, boolean ssl)
-    {
-        connect(host, port, new Binding_0_9(session),ssl);
-    }
-
-    private static class Binding_0_9
-        implements Binding<AMQVersionAwareProtocolSession,ByteBuffer>
-    {
-
-        private AMQVersionAwareProtocolSession session;
-
-        Binding_0_9(AMQVersionAwareProtocolSession session)
-        {
-            this.session = session;
-        }
-
-        public AMQVersionAwareProtocolSession endpoint(Sender<ByteBuffer> sender)
-        {
-            session.setSender(sender);
-            return session;
-        }
-
-        public Receiver<ByteBuffer> receiver(AMQVersionAwareProtocolSession ssn)
-        {
-            return new InputHandler_0_9(ssn);
-        }
-
-    }
-
     private static Socket createSocket(String host, int port)
     {
         try
