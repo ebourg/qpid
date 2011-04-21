@@ -42,7 +42,6 @@ import org.apache.qpid.client.AMQConnection;
 import org.apache.qpid.client.AMQQueue;
 import org.apache.qpid.client.AMQSession;
 import org.apache.qpid.client.AMQTopic;
-import org.apache.qpid.management.common.JMXConnnectionFactory;
 import org.apache.qpid.test.utils.QpidBrokerTestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -154,8 +153,7 @@ public class DurableSubscriptionTest extends QpidBrokerTestCase
         if(isJavaBroker() && isExternalBroker())
         {
             //Verify that the queue was deleted by querying for its JMX MBean
-            _jmxc = JMXConnnectionFactory.getJMXConnection(5000, "127.0.0.1",
-                    getManagementPort(getPort()), USER, PASSWORD);
+            //_jmxc = JMXConnnectionFactory.getJMXConnection(5000, "127.0.0.1", getManagementPort(getPort()), USER, PASSWORD);
 
             _jmxConnected = true;
             _mbsc = _jmxc.getMBeanServerConnection();

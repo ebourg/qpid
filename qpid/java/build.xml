@@ -23,15 +23,10 @@
   <import file="common.xml"/>
 
 
-  <findSubProjects name="management" dir="management" excludes="common,example,tools/qpid-cli"/>
-
-  <property name="modules.core"       value="junit-toolkit common management/common client tools"/>
-  <property name="modules.examples"   value="client/example management/example"/>
+  <property name="modules.core"       value="junit-toolkit common client tools"/>
+  <property name="modules.examples"   value="client/example"/>
   <property name="modules.tests"      value="systests perftests integrationtests testkit"/>
-  <property name="modules.management" value="${management}"/>
-  <property name="modules.management.tools" value="management/tools/qpid-cli"/>
-  <property name="modules"            value="${modules.core} ${modules.examples}
-   ${modules.management} ${modules.management.tools} ${modules.tests}"/>
+  <property name="modules"            value="${modules.core} ${modules.examples} ${modules.tests}"/>
 
   <property name="qpid.jar"           location="${build.lib}/qpid-all.jar"/>
   <basename property="qpid.jar.name"  file="${qpid.jar}"/>
