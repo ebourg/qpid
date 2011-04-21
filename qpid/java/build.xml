@@ -23,17 +23,15 @@
   <import file="common.xml"/>
 
 
-  <findSubProjects name="broker-plugins" dir="broker-plugins"/>
   <findSubProjects name="management" dir="management" excludes="common,example,tools/qpid-cli"/>
 
-  <property name="modules.core"       value="junit-toolkit common management/common broker client tools"/>
+  <property name="modules.core"       value="junit-toolkit common management/common client tools"/>
   <property name="modules.examples"   value="client/example management/example"/>
   <property name="modules.tests"      value="systests perftests integrationtests testkit"/>
   <property name="modules.management" value="${management}"/>
-  <property name="modules.plugin"     value="${broker-plugins}"/>
   <property name="modules.management.tools" value="management/tools/qpid-cli"/>
   <property name="modules"            value="${modules.core} ${modules.examples}
-   ${modules.management} ${modules.management.tools} ${modules.tests} ${modules.plugin}"/>
+   ${modules.management} ${modules.management.tools} ${modules.tests}"/>
 
   <property name="qpid.jar"           location="${build.lib}/qpid-all.jar"/>
   <basename property="qpid.jar.name"  file="${qpid.jar}"/>
@@ -223,8 +221,6 @@
 		      >
       <fileset dir="${project.root}/common/src/main/java" includes="**/*.java" />
       <fileset dir="${project.root}/build/scratch/common/src" includes="**/*.java" />
-      <fileset dir="${project.root}/broker/src/main/java" includes="**/*.java" />
-      <fileset dir="${project.root}/build/scratch/broker/src" includes="**/*.java" />
       <fileset dir="${project.root}/client/src/main/java" includes="**/*.java" />
       <fileset dir="${project.root}/build/scratch/client/src" includes="**/*.java" />
     </cobertura-report>
@@ -234,8 +230,6 @@
 		      >
       <fileset dir="${project.root}/common/src/main/java" includes="**/*.java" />
       <fileset dir="${project.root}/build/scratch/common/src" includes="**/*.java" />
-      <fileset dir="${project.root}/broker/src/main/java" includes="**/*.java" />
-      <fileset dir="${project.root}/build/scratch/broker/src" includes="**/*.java" />
       <fileset dir="${project.root}/client/src/main/java" includes="**/*.java" />
       <fileset dir="${project.root}/build/scratch/client/src" includes="**/*.java" />
     </cobertura-report>
@@ -246,7 +240,7 @@
   </target>
   
   <target name="cover-test" description="run tests and generate coverage information" depends="build">
-    <iterate target="cover-test" modules="broker client common"/>
+    <iterate target="cover-test" modules="client common"/>
   </target>
 
   <target name="test-interop" depends="build,compile-tests"
