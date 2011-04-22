@@ -30,7 +30,6 @@
  
 package org.apache.qpid.framing.amqp_$version.getMajor()_$version.getMinor();
 
-import org.apache.qpid.AMQException;
 import org.apache.qpid.framing.*;
 
 
