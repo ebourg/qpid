@@ -26,7 +26,7 @@ import org.apache.qpid.transport.network.Assembler;
 import org.apache.qpid.transport.network.Disassembler;
 import org.apache.qpid.transport.network.InputHandler;
 import org.apache.qpid.transport.network.NetworkTransport;
-import org.apache.qpid.transport.network.Transport;
+import org.apache.qpid.transport.network.io.IoNetworkTransport;
 import org.apache.qpid.transport.network.security.SecurityLayer;
 
 public class TransportBuilder
@@ -40,7 +40,7 @@ public class TransportBuilder
     {
         this.con = con;
         this.settings = con.getConnectionSettings();
-        transport = Transport.getTransport();    
+        transport = new IoNetworkTransport();    
         transport.init(settings);        
         securityLayer.init(con);
     }
