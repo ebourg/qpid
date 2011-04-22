@@ -31,7 +31,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.qpid.thread.Threading;
 import org.apache.qpid.transport.DeliveryProperties;
 import org.apache.qpid.transport.ExchangeBind;
 import org.apache.qpid.transport.Header;
@@ -46,8 +45,6 @@ import org.apache.qpid.transport.MessageTransfer;
 import org.apache.qpid.transport.QueueDeclare;
 import org.apache.qpid.transport.SessionException;
 import org.apache.qpid.transport.SessionListener;
-import org.apache.qpid.util.UUIDGen;
-import org.apache.qpid.util.UUIDs;
 
 /**
  * QpidBench
@@ -445,7 +442,7 @@ public class QpidBench
             Thread t;
             try
             {
-                t = Threading.getThreadFactory().createThread(r);                      
+                t = new Thread(r);                      
             }
             catch(Exception e)
             {
@@ -479,7 +476,7 @@ public class QpidBench
             Thread t;
             try
             {
-                t = Threading.getThreadFactory().createThread(r);                      
+                t = new Thread(r);                      
             }
             catch(Exception e)
             {
@@ -600,7 +597,6 @@ public class QpidBench
         ssn.messageFlow("echo-queue", MessageCreditUnit.MESSAGE, 0xFFFFFFFF);
         ssn.messageFlow("echo-queue", MessageCreditUnit.BYTE, 0xFFFFFFFF);
 
-        UUIDGen gen = UUIDs.newGenerator();
 
         long count = 0;
         long lastTime = 0;
@@ -640,11 +636,6 @@ public class QpidBench
                 dp.setDeliveryMode
                     (opts.persistent ? MessageDeliveryMode.PERSISTENT : MessageDeliveryMode.NON_PERSISTENT);
 
-            }
-
-            if (opts.message_id)
-            {
-                mp.setMessageId(gen.generate());
             }
 
             if (opts.timestamp)

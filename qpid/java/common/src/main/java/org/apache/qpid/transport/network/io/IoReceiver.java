@@ -20,7 +20,6 @@
  */
 package org.apache.qpid.transport.network.io;
 
-import org.apache.qpid.thread.Threading;
 import org.apache.qpid.transport.Receiver;
 import org.apache.qpid.transport.TransportException;
 import org.apache.qpid.transport.util.Logger;
@@ -63,7 +62,7 @@ final class IoReceiver implements Runnable
 
         try
         {
-            receiverThread = Threading.getThreadFactory().createThread(this);
+            receiverThread = new Thread(this, "IoReceiver");
         }
         catch(Exception e)
         {

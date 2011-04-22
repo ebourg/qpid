@@ -22,7 +22,7 @@ package org.apache.qpid.framing;
 
 import org.apache.mina.common.ByteBuffer;
 
-public class AMQFrame extends AMQDataBlock implements EncodableAMQDataBlock
+public class AMQFrame extends AMQDataBlock
 {
     private final int _channel;
 

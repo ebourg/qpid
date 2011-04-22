@@ -39,8 +39,6 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.qpid.AMQException;
 import org.apache.qpid.exchange.ExchangeDefaults;
-import org.apache.qpid.url.URLSyntaxException;
-import org.apache.qpid.util.FileUtils;
 
 /**
  * Qpid base class for system testing test cases.
@@ -248,7 +246,6 @@ public class QpidBrokerTestCase extends QpidTestCase
 
             File existing = new File(existingQpidWorkPath);
             File qpidWork = new File(getQpidWork(_broker, getPort()));
-            FileUtils.copyRecursive(existing, qpidWork);
         }
 
         startBroker();

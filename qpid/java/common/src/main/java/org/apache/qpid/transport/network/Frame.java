@@ -21,7 +21,6 @@
 package org.apache.qpid.transport.network;
 
 import org.apache.qpid.transport.SegmentType;
-import org.apache.qpid.transport.util.SliceIterator;
 
 import java.nio.ByteBuffer;
 

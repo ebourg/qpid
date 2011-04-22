@@ -26,7 +26,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-public class ProtocolInitiation extends AMQDataBlock implements EncodableAMQDataBlock
+public class ProtocolInitiation extends AMQDataBlock
 {
 
     // TODO: generate these constants automatically from the xml protocol spec file

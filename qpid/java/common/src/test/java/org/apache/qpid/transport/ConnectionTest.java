@@ -23,8 +23,7 @@ package org.apache.qpid.transport;
 import org.apache.mina.util.AvailablePortFinder;
 
 import org.apache.qpid.test.utils.QpidTestCase;
-import org.apache.qpid.transport.network.ConnectionBinding;
-import org.apache.qpid.transport.network.io.IoAcceptor;
+//import org.apache.qpid.transport.network.io.IoAcceptor;
 import org.apache.qpid.transport.util.Logger;
 import org.apache.qpid.transport.util.Waiter;
 
@@ -33,7 +32,6 @@ import java.util.List;
 import java.util.Collections;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.io.IOException;
 
 import static org.apache.qpid.transport.Option.*;
 
@@ -51,7 +49,7 @@ public class ConnectionTest extends QpidTestCase implements SessionListener
     private List<MessageTransfer> messages = new ArrayList<MessageTransfer>();
     private List<MessageTransfer> incoming = new ArrayList<MessageTransfer>();
 
-    private IoAcceptor _ioa = null;
+    //private IoAcceptor _ioa = null;
 
 
     protected void setUp() throws Exception
@@ -63,10 +61,11 @@ public class ConnectionTest extends QpidTestCase implements SessionListener
 
     protected void tearDown() throws Exception
     {
+        /*
         if (_ioa != null)
         {
             _ioa.close();
-        }
+        }*/
 
         super.tearDown();
     }
@@ -231,6 +230,7 @@ public class ConnectionTest extends QpidTestCase implements SessionListener
             }
         };
 
+        /*
         try
         {
             _ioa = new IoAcceptor("localhost", port, ConnectionBinding.get(server));
@@ -242,6 +242,7 @@ public class ConnectionTest extends QpidTestCase implements SessionListener
         }
 
         _ioa.start();
+        */
     }
 
     public void testClosedNotificationAndWriteToClosed() throws Exception
