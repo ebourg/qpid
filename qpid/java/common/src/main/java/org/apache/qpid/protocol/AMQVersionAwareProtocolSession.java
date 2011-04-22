@@ -21,10 +21,7 @@
 package org.apache.qpid.protocol;
 
 import org.apache.qpid.framing.*;
-import org.apache.qpid.transport.Sender;
 import org.apache.qpid.AMQException;
-
-import java.nio.ByteBuffer;
 
 
 /**

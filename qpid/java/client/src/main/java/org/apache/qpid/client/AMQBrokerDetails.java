@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.qpid.jms.BrokerDetails;
-import org.apache.qpid.jms.ConnectionURL;
 import org.apache.qpid.url.URLHelper;
 import org.apache.qpid.url.URLSyntaxException;
 
@@ -56,8 +55,7 @@ public class AMQBrokerDetails implements BrokerDetails
             if (transport != null)
             {
                 //todo this list of valid transports should be enumerated somewhere
-                if ((!(transport.equalsIgnoreCase(BrokerDetails.VM) ||
-                       transport.equalsIgnoreCase(BrokerDetails.TCP) ||
+                if ((!(transport.equalsIgnoreCase(BrokerDetails.TCP) ||
                        transport.equalsIgnoreCase(BrokerDetails.SOCKET))))
                 {
                     if (transport.equalsIgnoreCase("localhost"))
@@ -301,11 +299,7 @@ public class AMQBrokerDetails implements BrokerDetails
 
         sb.append(_transport);
         sb.append("://");
-
-        if (!(_transport.equalsIgnoreCase(VM)))
-        {
-            sb.append(_host);
-        }
+        sb.append(_host);
 
         if (!(_transport.equalsIgnoreCase(SOCKET)))
         {

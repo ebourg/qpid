@@ -20,7 +20,6 @@
  */
 package org.apache.qpid.client.message;
 
-import java.io.IOException;
 import java.util.Enumeration;
 import java.util.UUID;
 
@@ -32,8 +31,6 @@ import javax.jms.MessageNotWriteableException;
 import org.apache.mina.common.ByteBuffer;
 import org.apache.qpid.AMQException;
 import org.apache.qpid.client.AMQSession;
-import org.apache.qpid.framing.AMQShortString;
-import org.apache.qpid.framing.BasicContentHeaderProperties;
 
 public abstract class AbstractJMSMessage implements org.apache.qpid.jms.Message
 {

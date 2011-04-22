@@ -37,8 +37,6 @@ import org.slf4j.LoggerFactory;
 
 import org.apache.mina.common.ByteBuffer;
 
-import org.apache.qpid.framing.abstraction.ProtocolVersionMethodConverter;
-
 
 public class MethodRegistry_$version.getMajor()_$version.getMinor() extends MethodRegistry
 {
@@ -184,10 +182,4 @@ public class MethodRegistry_$version.getMajor()_$version.getMinor() extends Meth
 #end
 		
 	
-    public ProtocolVersionMethodConverter getProtocolVersionMethodConverter()
-    {
-        return _protocolVersionConverter;
-    }	
-
-    
 }

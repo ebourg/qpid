@@ -32,8 +32,6 @@ package org.apache.qpid.framing;
 
 import org.apache.mina.common.ByteBuffer;
 
-import org.apache.qpid.framing.abstraction.ProtocolVersionMethodConverter;
-
 import java.util.Map;
 import java.util.HashMap;
 
@@ -99,6 +97,4 @@ public abstract class MethodRegistry
 #end
 
 
-	public abstract ProtocolVersionMethodConverter getProtocolVersionMethodConverter();
-	
 }

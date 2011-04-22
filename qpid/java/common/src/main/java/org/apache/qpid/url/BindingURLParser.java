@@ -439,40 +439,4 @@ public class BindingURLParser
         }
     }
 
-    public static void main(String[] args)
-    {
-        
-        String[] urls = new String[]
-           {
-             "topic://amq.topic//myTopic?routingkey='stocks.#'",
-             "topic://amq.topic/message_queue?bindingkey='usa.*'&bindingkey='control',exclusive='true'",
-             "topic://amq.topic//?bindingKey='usa.*',bindingkey='control',exclusive='true'",
-             "direct://amq.direct/dummyDest/myQueue?routingkey='abc.*'",
-             "exchange.Class://exchangeName/Destination/Queue",
-             "exchangeClass://exchangeName/Destination/?option='value',option2='value2'",
-             "IBMPerfQueue1?durable='true'",
-             "exchangeClass://exchangeName/Destination/?bindingkey='key1',bindingkey='key2'",
-             "exchangeClass://exchangeName/Destination/?bindingkey='key1'&routingkey='key2'"
-           };
-
-        try
-        {
-            BindingURLParser parser = new BindingURLParser();
-
-            for (String url: urls)
-            {
-                System.out.println("URL " + url);
-                AMQBindingURL bindingURL = new AMQBindingURL(url);
-                parser.parse(url,bindingURL);
-                System.out.println("\nX " + bindingURL.toString() + " \n");
-
-            }
-
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-        }
-    }
-
 }

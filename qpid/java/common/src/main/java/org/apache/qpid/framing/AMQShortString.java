@@ -763,17 +763,4 @@ public final class AMQShortString implements CharSequence, Comparable<AMQShortSt
         return obj == null ? null : new AMQShortString(String.valueOf(obj));
     }
 
-
-    public static void main(String args[])
-    {
-        AMQShortString s = new AMQShortString("a.b.c.d.e.f.g.h.i.j.k");
-        AMQShortString s2 = s.substring(2, 7);
-
-        AMQShortStringTokenizer t = s2.tokenize((byte) '.');
-        while(t.hasMoreTokens())
-        {
-            System.err.println(t.nextToken());
-        }
-    }
-
 }
