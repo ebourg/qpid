@@ -20,7 +20,7 @@
  */
 package org.apache.qpid.transport.util;
 
-import org.slf4j.LoggerFactory;
+import java.util.logging.Level;
 
 /**
  * Logger
@@ -32,72 +32,72 @@ public final class Logger
 
     public static final Logger get(Class<?> klass)
     {
-        return new Logger(LoggerFactory.getLogger(klass));
+        return new Logger(java.util.logging.Logger.getLogger(klass.getName()));
     }
 
-    private final org.slf4j.Logger log;
+    private final java.util.logging.Logger log;
 
-    private Logger(org.slf4j.Logger log)
+    private Logger(java.util.logging.Logger log)
     {
         this.log = log;
     }
 
     public boolean isDebugEnabled()
     {
-        return log.isDebugEnabled();
+        return log.isLoggable(Level.FINE);
     }
 
     public void debug(String message, Object ... args)
     {
-        if (log.isDebugEnabled())
+        if (log.isLoggable(Level.FINE))
         {
-            log.debug(String.format(message, args));
+            log.fine(String.format(message, args));
         }
     }
 
     public void debug(Throwable t, String message, Object ... args)
     {
-        if (log.isDebugEnabled())
+        if (log.isLoggable(Level.FINE))
         {
-            log.debug(String.format(message, args), t);
+            log.log(Level.FINE, String.format(message, args), t);
         }
     }
 
     public void error(String message, Object ... args)
     {
-        if (log.isErrorEnabled())
+        if (log.isLoggable(Level.SEVERE))
         {
-            log.error(String.format(message, args));
+            log.severe(String.format(message, args));
         }
     }
 
     public void error(Throwable t, String message, Object ... args)
     {
-        if (log.isErrorEnabled())
+        if (log.isLoggable(Level.SEVERE))
         {
-            log.error(String.format(message, args), t);
+            log.log(Level.SEVERE, String.format(message, args), t);
         }
     }
 
     public void warn(String message, Object ... args)
     {
-        if (log.isWarnEnabled())
+        if (log.isLoggable(Level.WARNING))
         {
-            log.warn(String.format(message, args));
+            log.warning(String.format(message, args));
         }
     }
 
     public void warn(Throwable t, String message, Object ... args)
     {
-        if (log.isWarnEnabled())
+        if (log.isLoggable(Level.WARNING))
         {
-            log.warn(String.format(message, args), t);
+            log.log(Level.WARNING, String.format(message, args), t);
         }
     }
 
     public void info(String message, Object ... args)
     {
-        if (log.isInfoEnabled())
+        if (log.isLoggable(Level.INFO))
         {
             log.info(String.format(message, args));
         }
@@ -105,25 +105,25 @@ public final class Logger
 
     public void info(Throwable t, String message, Object ... args)
     {
-        if (log.isInfoEnabled())
+        if (log.isLoggable(Level.INFO))
         {
-            log.info(String.format(message, args), t);
+            log.log(Level.INFO, String.format(message, args), t);
         }
     }
 
     public void trace(String message, Object ... args)
     {
-        if (log.isTraceEnabled())
+        if (log.isLoggable(Level.FINEST))
         {
-            log.trace(String.format(message, args));
+            log.finest(String.format(message, args));
         }
     }
 
     public void trace(Throwable t, String message, Object ... args)
     {
-        if (log.isTraceEnabled())
+        if (log.isLoggable(Level.FINEST))
         {
-            log.trace(String.format(message, args), t);
+            log.log(Level.FINEST, String.format(message, args), t);
         }
     }
 
