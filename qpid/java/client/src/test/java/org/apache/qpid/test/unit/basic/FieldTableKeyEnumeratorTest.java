@@ -27,7 +27,6 @@ import java.util.NoSuchElementException;
 import junit.framework.TestCase;
 
 import org.apache.qpid.framing.FieldTable;
-import org.apache.qpid.framing.FieldTableFactory;
 
 public class FieldTableKeyEnumeratorTest extends TestCase
 {
@@ -37,7 +36,7 @@ public class FieldTableKeyEnumeratorTest extends TestCase
     }
     public void testKeyEnumeration()
     {
-        FieldTable result = FieldTableFactory.newFieldTable();
+        FieldTable result = new FieldTable();
         result.setObject("one", 1L);
         result.setObject("two", 2L);
         result.setObject("three", 3L);

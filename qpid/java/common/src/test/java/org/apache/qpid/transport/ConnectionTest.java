@@ -29,7 +29,6 @@ import org.apache.qpid.transport.util.Waiter;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Collections;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -210,6 +209,7 @@ public class ConnectionTest extends QpidTestCase implements SessionListener
 
     private void startServer(final ProtocolHeader protocolHeader)
     {
+        /*
         ConnectionDelegate server = new ServerDelegate()
         {
             @Override
@@ -230,7 +230,6 @@ public class ConnectionTest extends QpidTestCase implements SessionListener
             }
         };
 
-        /*
         try
         {
             _ioa = new IoAcceptor("localhost", port, ConnectionBinding.get(server));
