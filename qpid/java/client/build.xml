@@ -34,9 +34,6 @@
 
   <target name="precompile">
     <mkdir dir="${output.dir}"/>
-    <javacc target="src/main/grammar/SelectorParser.jj"
-            outputdirectory="${output.dir}"
-            javacchome="${project.root}/lib"/>
   </target>
 
 

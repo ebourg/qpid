@@ -32,38 +32,15 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import javax.jms.BytesMessage;
-import javax.jms.Connection;
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.MapMessage;
-import javax.jms.Message;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageProducer;
-import javax.jms.ObjectMessage;
-import javax.jms.Queue;
-import javax.jms.Session;
-import javax.jms.StreamMessage;
-import javax.jms.TextMessage;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.qpid.AMQException;
-import org.apache.qpid.client.AMQConnection;
-import org.apache.qpid.client.AMQConnectionFactory;
-import org.apache.qpid.client.AMQQueue;
-import org.apache.qpid.client.transport.TransportConnection;
 import org.apache.qpid.exchange.ExchangeDefaults;
-import org.apache.qpid.jms.BrokerDetails;
-import org.apache.qpid.jms.ConnectionURL;
 import org.apache.qpid.url.URLSyntaxException;
 import org.apache.qpid.util.FileUtils;
-import org.apache.qpid.util.LogMonitor;
 
 /**
  * Qpid base class for system testing test cases.
@@ -89,16 +66,6 @@ public class QpidBrokerTestCase extends QpidTestCase
     protected static final String CONTENT = "content";
 
     private static final String DEFAULT_INITIAL_CONTEXT = "org.apache.qpid.jndi.PropertiesFileInitialContextFactory";
-
-    static
-    {
-        String initialContext = System.getProperty(InitialContext.INITIAL_CONTEXT_FACTORY);
-
-        if (initialContext == null || initialContext.length() == 0)
-        {
-            System.setProperty(InitialContext.INITIAL_CONTEXT_FACTORY, DEFAULT_INITIAL_CONTEXT);
-        }
-    }
 
     // system properties
     private static final String BROKER_LANGUAGE = "broker.language";
@@ -144,13 +111,9 @@ public class QpidBrokerTestCase extends QpidTestCase
 
     protected Map<Integer, Process> _brokers = new HashMap<Integer, Process>();
 
-    protected InitialContext _initialContext;
-    protected AMQConnectionFactory _connectionFactory;
-
     protected String _testName;
 
     // the connections created for a given test
-    protected List<Connection> _connections = new ArrayList<Connection>();
     public static final String QUEUE = "queue";
     public static final String TOPIC = "topic";
     
@@ -877,120 +840,6 @@ public class QpidBrokerTestCase extends QpidTestCase
     }
 
     /**
-     * we assume that the environment is correctly set
-     * i.e. -Djava.naming.provider.url="..//example010.properties"
-     * TODO should be a way of setting that through maven
-     *
-     * @return an initial context
-     *
-     * @throws NamingException if there is an error getting the context
-     */
-    public InitialContext getInitialContext() throws NamingException
-    {
-        _logger.info("get InitialContext");
-        if (_initialContext == null)
-        {
-            _initialContext = new InitialContext();
-        }
-        return _initialContext;
-    }
-
-    /**
-     * Get the default connection factory for the currently used broker
-     * Default factory is "local"
-     *
-     * @return A conection factory
-     *
-     * @throws Exception if there is an error getting the tactory
-     */
-    public AMQConnectionFactory getConnectionFactory() throws NamingException
-    {
-        _logger.info("get ConnectionFactory");
-        if (_connectionFactory == null)
-        {
-            if (Boolean.getBoolean("profile.use_ssl"))
-            {
-                _connectionFactory = getConnectionFactory("default.ssl");
-            }
-            else
-            {
-                _connectionFactory = getConnectionFactory("default");
-            }
-        }
-        return _connectionFactory;
-    }
-
-    /**
-     * Get a connection factory for the currently used broker
-     *
-     * @param factoryName The factory name
-     *
-     * @return A conection factory
-     *
-     * @throws Exception if there is an error getting the tactory
-     */
-    public AMQConnectionFactory getConnectionFactory(String factoryName) throws NamingException
-    {
-        if (_broker.equals(VM))
-        {
-            factoryName += ".vm";
-        }
-
-        return (AMQConnectionFactory) getInitialContext().lookup(factoryName);
-    }
-
-    public Connection getConnection() throws JMSException, NamingException
-    {
-        return getConnection("guest", "guest");
-    }
-
-    public Connection getConnection(ConnectionURL url) throws JMSException
-    {
-        _logger.info(url.getURL());
-        Connection connection = new AMQConnectionFactory(url).createConnection(url.getUsername(), url.getPassword());
-
-        _connections.add(connection);
-
-        return connection;
-    }
-
-    /**
-     * Get a connection (remote or in-VM)
-     *
-     * @param username The user name
-     * @param password The user password
-     *
-     * @return a newly created connection
-     *
-     * @throws Exception if there is an error getting the connection
-     */
-    public Connection getConnection(String username, String password) throws JMSException, NamingException
-    {
-        _logger.info("get connection");
-        Connection con = getConnectionFactory().createConnection(username, password);
-        //add the connection in the lis of connections
-        _connections.add(con);
-        return con;
-    }
-
-    public Connection getClientConnection(String username, String password, String id) throws JMSException, URLSyntaxException, AMQException, NamingException
-    {
-        _logger.info("get Connection");
-        Connection con;
-        if (_broker.equals(VM))
-        {
-            con = new AMQConnection("vm://:1", username, password, id, "test");
-        }
-        else
-        {
-            con = getConnectionFactory().createConnection(username, password, id);
-        }
-        //add the connection in the lis of connections
-        _connections.add(con);
-        return con;
-    }
-
-    /**
      * Return a uniqueName for this test.
      * In this case it returns a queue Named by the TestCase and TestName
      *
@@ -1001,201 +850,12 @@ public class QpidBrokerTestCase extends QpidTestCase
         return getClass().getSimpleName() + "-" + getName();
     }
 
-    /**
-     * Return a Queue specific for this test.
-     * Uses getTestQueueName() as the name of the queue
-     * @return
-     */
-    public Queue getTestQueue()
-    {
-        return new AMQQueue(ExchangeDefaults.DIRECT_EXCHANGE_NAME, getTestQueueName());
-    }
-
 
     protected void tearDown() throws java.lang.Exception
     {
-        try
-        {
-            // close all the connections used by this test.
-            for (Connection c : _connections)
-            {
-                c.close();
-            }
-        }
-        finally{
-            // Ensure any problems with close does not interfer with property resets
-            revertSystemProperties();
-            revertLoggingLevels();
-        }
-    }
-
-    /**
-     * Consume all the messages in the specified queue. Helper to ensure
-     * persistent tests don't leave data behind.
-     *
-     * @param queue the queue to purge
-     *
-     * @return the count of messages drained
-     *
-     * @throws Exception if a problem occurs
-     */
-    protected int drainQueue(Queue queue) throws Exception
-    {
-        Connection connection = getConnection();
-
-        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-
-        MessageConsumer consumer = session.createConsumer(queue);
-
-        connection.start();
-
-        int count = 0;
-        while (consumer.receive(1000) != null)
-        {
-            count++;
-        }
-
-        connection.close();
-
-        return count;
-    }
-
-    /**
-     * Send messages to the given destination.
-     *
-     * If session is transacted then messages will be commited before returning
-     *
-     * @param session the session to use for sending
-     * @param destination where to send them to
-     * @param count no. of messages to send
-     *
-     * @return the sent messges
-     *
-     * @throws Exception
-     */
-    public List<Message> sendMessage(Session session, Destination destination,
-                                     int count) throws Exception
-    {
-        return sendMessage(session, destination, count, 0, 0);
-    }
-
-    /**
-     * Send messages to the given destination.
-     *
-     * If session is transacted then messages will be commited before returning
-     *
-     * @param session the session to use for sending
-     * @param destination where to send them to
-     * @param count no. of messages to send
-     *
-     * @param batchSize the batchSize in which to commit, 0 means no batching,
-     * but a single commit at the end
-     * @return the sent messgse
-     *
-     * @throws Exception
-     */
-    public List<Message> sendMessage(Session session, Destination destination,
-                                     int count, int batchSize) throws Exception
-    {
-        return sendMessage(session, destination, count, 0, batchSize);
-    }
-
-    /**
-     * Send messages to the given destination.
-     *
-     * If session is transacted then messages will be commited before returning
-     *
-     * @param session the session to use for sending
-     * @param destination where to send them to
-     * @param count no. of messages to send
-     *
-     * @param offset offset allows the INDEX value of the message to be adjusted.
-     * @param batchSize the batchSize in which to commit, 0 means no batching,
-     * but a single commit at the end
-     * @return the sent messgse
-     *
-     * @throws Exception
-     */
-    public List<Message> sendMessage(Session session, Destination destination,
-                                     int count, int offset, int batchSize) throws Exception
-    {
-        List<Message> messages = new ArrayList<Message>(count);
-
-        MessageProducer producer = session.createProducer(destination);
-
-        int i = offset;
-        for (; i < (count + offset); i++)
-        {
-            Message next = createNextMessage(session, i);
-
-            producer.send(next);
-
-            if (session.getTransacted() && batchSize > 0)
-            {
-                if (i % batchSize == 0)
-                {
-                    session.commit();
-                }
-
-            }
-
-            messages.add(next);
-        }
-
-        // Ensure we commit the last messages
-        // Commit the session if we are transacted and
-        // we have no batchSize or
-        // our count is not divible by batchSize.
-        if (session.getTransacted() &&
-            ( batchSize == 0 || (i-1) % batchSize != 0))
-        {
-            session.commit();
-        }
-
-        return messages;
-    }
-
-    public Message createNextMessage(Session session, int msgCount) throws JMSException
-    {
-        Message message = createMessage(session, _messageSize);
-        message.setIntProperty(INDEX, msgCount);
-
-        return message;
-
-    }
-
-    public Message createMessage(Session session, int messageSize) throws JMSException
-    {
-        String payload = new String(new byte[messageSize]);
-
-        Message message;
-
-        switch (_messageType)
-        {
-            case BYTES:
-                message = session.createBytesMessage();
-                ((BytesMessage) message).writeUTF(payload);
-                break;
-            case MAP:
-                message = session.createMapMessage();
-                ((MapMessage) message).setString(CONTENT, payload);
-                break;
-            default: // To keep the compiler happy
-            case TEXT:
-                message = session.createTextMessage();
-                ((TextMessage) message).setText(payload);
-                break;
-            case OBJECT:
-                message = session.createObjectMessage();
-                ((ObjectMessage) message).setObject(payload);
-                break;
-            case STREAM:
-                message = session.createStreamMessage();
-                ((StreamMessage) message).writeString(payload);
-                break;
-        }
-
-        return message;
+        // Ensure any problems with close does not interfer with property resets
+        revertSystemProperties();
+        revertLoggingLevels();
     }
 
     protected int getMessageSize()
@@ -1206,33 +866,6 @@ public class QpidBrokerTestCase extends QpidTestCase
     protected void setMessageSize(int byteSize)
     {
         _messageSize = byteSize;
-    }
-
-    public ConnectionURL getConnectionURL() throws NamingException
-    {
-        return getConnectionFactory().getConnectionURL();
-    }
-
-    public BrokerDetails getBroker()
-    {
-        try
-        {
-            if (getConnectionFactory().getConnectionURL().getBrokerCount() > 0)
-            {
-                return getConnectionFactory().getConnectionURL().getBrokerDetails(0);
-            }
-            else
-            {
-                fail("No broker details are available.");
-            }
-        }
-        catch (NamingException e)
-        {
-            fail(e.getMessage());
-        }
-
-        //keep compiler happy
-        return null;
     }
 
 }

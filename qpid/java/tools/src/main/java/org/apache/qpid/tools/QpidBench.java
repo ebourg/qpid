@@ -31,16 +31,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.jms.DeliveryMode;
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageListener;
-import javax.jms.MessageProducer;
-import javax.jms.TextMessage;
-
-import org.apache.qpid.client.AMQConnection;
 import org.apache.qpid.thread.Threading;
 import org.apache.qpid.transport.DeliveryProperties;
 import org.apache.qpid.transport.ExchangeBind;
@@ -440,11 +430,6 @@ public class QpidBench
                 {
                     try
                     {
-                        if (opts.jms_consume)
-                        {
-                            jms_consumer(opts);
-                        }
-                        else
                         {
                             native_consumer(opts);
                         }
@@ -480,11 +465,6 @@ public class QpidBench
                 {
                     try
                     {
-                        if (opts.jms_publish)
-                        {
-                            jms_publisher(opts);
-                        }
-                        else
                         {
                             native_publisher(opts);
                         }
@@ -545,143 +525,6 @@ public class QpidBench
         String stats = String.format
             ("%s: %d %.2f %.2f", name, count, cumulative, interval);
         System.out.println(String.format("%s%-36s%s", pfx, stats, sfx));
-    }
-
-    private static final javax.jms.Connection getJMSConnection(Options opts) throws Exception
-    {
-        String url = String.format
-            ("amqp://guest:guest@clientid/test?brokerlist='tcp://%s:%d'",
-             opts.broker, opts.port);
-        return new AMQConnection(url);
-    }
-
-    private static final void jms_publisher(Options opts) throws Exception
-    {
-        javax.jms.Connection conn = getJMSConnection(opts);
-
-        javax.jms.Session ssn = conn.createSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE);
-        Destination dest = ssn.createQueue("test-queue");
-        Destination echo_dest = ssn.createQueue("echo-queue");
-        MessageProducer prod = ssn.createProducer(dest);
-        MessageConsumer cons = ssn.createConsumer(echo_dest);
-        prod.setDisableMessageID(!opts.message_id);
-        prod.setDisableMessageTimestamp(!opts.timestamp);
-        prod.setDeliveryMode(opts.persistent ? DeliveryMode.PERSISTENT : DeliveryMode.NON_PERSISTENT);
-
-        StringBuilder str = new StringBuilder();
-        for (int i = 0; i < opts.size; i++)
-        {
-            str.append((char) (i % 128));
-        }
-
-        String body = str.toString();
-
-        TextMessage cached = ssn.createTextMessage();
-        cached.setText(body);
-
-        conn.start();
-
-        long count = 0;
-        long lastTime = 0;
-        long start = System.currentTimeMillis();
-        while (opts.count == 0 || count < opts.count)
-        {
-            if (opts.window > 0 && (count % opts.window) == 0 && count > 0)
-            {
-                Message echo = cons.receive();
-            }
-
-            if (opts.sample > 0 && (count % opts.sample) == 0)
-            {
-                long time = System.currentTimeMillis();
-                sample(opts, Column.LEFT, "JP", count, start, time, lastTime);
-                lastTime = time;
-            }
-
-            TextMessage m;
-            if (opts.message_cache)
-            {
-                m = cached;
-            }
-            else
-            {
-                m = ssn.createTextMessage();
-                m.setText(body);
-            }
-
-            prod.send(m);
-            count++;
-        }
-
-        conn.close();
-    }
-
-    private static final void jms_consumer(final Options opts) throws Exception
-    {
-        final javax.jms.Connection conn = getJMSConnection(opts);
-        javax.jms.Session ssn = conn.createSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE);
-        Destination dest = ssn.createQueue("test-queue");
-        Destination echo_dest = ssn.createQueue("echo-queue");
-        MessageConsumer cons = ssn.createConsumer(dest);
-        final MessageProducer prod = ssn.createProducer(echo_dest);
-        prod.setDisableMessageID(true);
-        prod.setDisableMessageTimestamp(true);
-        prod.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
-        final TextMessage echo = ssn.createTextMessage();
-        echo.setText("ECHO");
-
-        final Object done = new Object();
-        cons.setMessageListener(new MessageListener()
-        {
-            private long count = 0;
-            private long lastTime = 0;
-            private long start;
-
-            public void onMessage(Message m)
-            {
-                if (count == 0)
-                {
-                    start = System.currentTimeMillis();
-                }
-
-                try
-                {
-                    boolean sample = opts.sample > 0 && (count % opts.sample) == 0;
-                    long time = sample ? System.currentTimeMillis() : 0;
-
-                    if (opts.window > 0 && (count % opts.window) == 0)
-                    {
-                        prod.send(echo);
-                    }
-
-                    if (sample)
-                    {
-                        sample(opts, Column.RIGHT, "JC", count, start, time, lastTime);
-                        lastTime = time;
-                    }
-                }
-                catch (JMSException e)
-                {
-                    throw new RuntimeException(e);
-                }
-                count++;
-
-                if (opts.count > 0 && count >= opts.count)
-                {
-                    synchronized (done)
-                    {
-                        done.notify();
-                    }
-                }
-            }
-        });
-
-        conn.start();
-        synchronized (done)
-        {
-            done.wait();
-        }
-        conn.close();
     }
 
     private static final org.apache.qpid.transport.Connection getConnection

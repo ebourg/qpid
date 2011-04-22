@@ -38,8 +38,6 @@ import javax.naming.NamingException;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.io.BufferedReader;
-import java.io.BufferedInputStream;
-import java.io.Reader;
 import java.io.InputStreamReader;
 import java.io.IOException;
 

@@ -22,7 +22,6 @@ package org.apache.qpid.client;
 
 import org.apache.qpid.test.utils.QpidBrokerTestCase;
 
-import java.io.File;
 import java.security.Provider;
 import java.security.Security;
 import java.util.List;
@@ -48,7 +47,7 @@ public class MultipleJCAProviderRegistrationTest extends QpidBrokerTestCase
         Provider[] providers = Security.getProviders();
 
         // Force the client to load the providers
-        getConnection();
+        //getConnection();
 
         Provider[] afterConnectionCreation = Security.getProviders();
 

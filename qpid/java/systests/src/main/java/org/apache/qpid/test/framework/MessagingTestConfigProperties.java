@@ -22,8 +22,6 @@ package org.apache.qpid.test.framework;
 
 import org.apache.qpid.junit.extensions.util.ParsedProperties;
 
-import javax.jms.Session;
-
 import java.util.Properties;
 
 /**
@@ -201,9 +199,6 @@ public class MessagingTestConfigProperties extends ParsedProperties
     /** Holds the name of the property to get the message acknowledgement mode from. */
     public static final String ACK_MODE_PROPNAME = "ackMode";
 
-    /** Defines the default message acknowledgement mode. */
-    public static final int ACK_MODE_DEFAULT = Session.AUTO_ACKNOWLEDGE;
-
     /** Holds the name of the property to get the durable subscriptions flag from, when doing pub/sub messaging. */
     public static final String DURABLE_SUBSCRIPTION_PROPNAME = "durableSubscription";
 
@@ -332,7 +327,6 @@ public class MessagingTestConfigProperties extends ParsedProperties
         defaults.setPropertyIfNull(TRANSACTED_PUBLISHER_PROPNAME, TRANSACTED_PUBLISHER_DEFAULT);
         defaults.setPropertyIfNull(TRANSACTED_RECEIVER_PROPNAME, TRANSACTED_RECEIVER_DEFAULT);
         defaults.setPropertyIfNull(NO_LOCAL_PROPNAME, NO_LOCAL_DEFAULT);
-        defaults.setPropertyIfNull(ACK_MODE_PROPNAME, ACK_MODE_DEFAULT);
         defaults.setPropertyIfNull(DURABLE_SUBSCRIPTION_PROPNAME, DURABLE_SUBSCRIPTION_DEFAULT);
 
         defaults.setPropertyIfNull(EXCLUSIVE_PROPNAME, EXCLUSIVE_DEFAULT);

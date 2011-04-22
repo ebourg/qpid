@@ -23,7 +23,6 @@ package org.apache.qpid.transport.network.security.sasl;
 
 import java.nio.ByteBuffer;
 
-import javax.security.sasl.SaslClient;
 import javax.security.sasl.SaslException;
 
 import org.apache.qpid.transport.Receiver;

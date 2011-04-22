@@ -24,12 +24,8 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import javax.jms.JMSException;
-
 import junit.framework.TestCase;
 
-import org.apache.qpid.client.message.JMSTextMessage;
-import org.apache.qpid.client.message.TestMessageHelper;
 import org.apache.qpid.framing.FieldTable;
 import org.apache.qpid.framing.FieldTableFactory;
 
@@ -63,30 +59,6 @@ public class FieldTableKeyEnumeratorTest extends TestCase
             fail("All elements should be found.");
         }
 
-    }
-
-    public void testPropertEnu()
-    {
-        try
-        {
-            JMSTextMessage text = TestMessageHelper.newJMSTextMessage();
-
-            text.setBooleanProperty("Boolean1", true);
-            text.setBooleanProperty("Boolean2", true);
-            text.setIntProperty("Int", 2);
-            text.setLongProperty("Long", 2);
-
-            Enumeration e = text.getPropertyNames();
-
-            assertTrue("Boolean1".equals(e.nextElement()));
-            assertTrue("Boolean2".equals(e.nextElement()));
-            assertTrue("Int".equals(e.nextElement()));
-            assertTrue("Long".equals(e.nextElement()));
-        }
-        catch (JMSException e)
-        {
-
-        }
     }
 
     public static junit.framework.Test suite()
