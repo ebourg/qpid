@@ -51,15 +51,6 @@ import org.apache.qpid.transport.util.Logger;
  */
 public final class IoTransport<E> implements IoContext
 {
-
-    static
-    {
-        org.apache.mina.common.ByteBuffer.setAllocator
-            (new org.apache.mina.common.SimpleByteBufferAllocator());
-        org.apache.mina.common.ByteBuffer.setUseDirectBuffers
-            (Boolean.getBoolean("amqj.enableDirectBuffers"));
-    }
-
     private static final Logger log = Logger.get(IoTransport.class);
 
     private static int DEFAULT_READ_WRITE_BUFFER_SIZE = 64 * 1024;

@@ -20,7 +20,7 @@
  */
 package org.apache.qpid.framing;
 
-import org.apache.mina.common.ByteBuffer;
+import java.nio.ByteBuffer;
 
 public class ContentHeaderPropertiesFactory
 {

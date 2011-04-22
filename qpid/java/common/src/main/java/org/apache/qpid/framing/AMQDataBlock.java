@@ -20,7 +20,7 @@
  */
 package org.apache.qpid.framing;
 
-import org.apache.mina.common.ByteBuffer;
+import java.nio.ByteBuffer;
 
 /**
  * A data block represents something that has a size in bytes and the ability to write itself to a byte
@@ -49,15 +49,4 @@ public abstract class AMQDataBlock
         buffer.flip();
         return buffer;
     }
-
-    public java.nio.ByteBuffer toNioByteBuffer()
-    {
-        final java.nio.ByteBuffer buffer = java.nio.ByteBuffer.allocate((int) getSize());
-
-        ByteBuffer buf = ByteBuffer.wrap(buffer);
-        writePayload(buf);    
-        buffer.flip();
-        return buffer;
-    }
-
 }

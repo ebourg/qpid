@@ -20,11 +20,10 @@
  */
 package org.apache.qpid.framing;
 
-import org.apache.mina.common.ByteBuffer;
-
 import java.util.Date;
 import java.util.Map;
 import java.math.BigDecimal;
+import java.nio.ByteBuffer;
 
 /**
  * AMQTypedValue combines together a native Java Object value, and an {@link AMQType}, as a fully typed AMQP parameter

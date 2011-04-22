@@ -21,13 +21,12 @@
 
 package org.apache.qpid.framing;
 
-import org.apache.mina.common.ByteBuffer;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.lang.ref.WeakReference;
+import java.nio.ByteBuffer;
 
 /**
  * A short string is a representation of an AMQ Short String
@@ -196,7 +195,7 @@ public final class AMQShortString implements CharSequence, Comparable<AMQShortSt
 
             _data = data.array();
             _offset = data.arrayOffset() + data.position();
-            data.skip(length);
+            data.position(data.position() + length);
 
         }
         _length = length;
@@ -270,7 +269,7 @@ public final class AMQShortString implements CharSequence, Comparable<AMQShortSt
 
     public static AMQShortString readFromBuffer(ByteBuffer buffer)
     {
-        final short length = buffer.getUnsigned();
+        final short length = (short) (buffer.get() & 0xff);
         if (length == 0)
         {
             return null;

@@ -20,7 +20,6 @@
  */
 package org.apache.qpid.framing;
 
-import org.apache.mina.common.ByteBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +34,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.nio.ByteBuffer;
 
 // extends FieldTable
 public class FieldTable
@@ -72,7 +72,7 @@ public class FieldTable
         _encodedForm.put(encodedForm);
         _encodedForm.flip();
         _encodedSize = length;
-        buffer.skip((int) length);
+        buffer.position(buffer.position() + (int) length);
     }
 
     public AMQTypedValue getProperty(AMQShortString string)
@@ -794,7 +794,6 @@ public class FieldTable
         final byte[] result = new byte[encodedSize];
         buffer.flip();
         buffer.get(result);
-        buffer.release();
 
         return result;
     }
@@ -928,7 +927,7 @@ public class FieldTable
     {
         if(_encodedForm != null)
         {
-            return new FieldTableIterator(_encodedForm.duplicate().rewind(),(int)_encodedSize);
+            return new FieldTableIterator((ByteBuffer) _encodedForm.duplicate().rewind(),(int)_encodedSize);
         }
         else
         {

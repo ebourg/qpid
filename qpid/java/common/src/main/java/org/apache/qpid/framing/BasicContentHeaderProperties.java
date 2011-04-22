@@ -20,7 +20,7 @@
  */
 package org.apache.qpid.framing;
 
-import org.apache.mina.common.ByteBuffer;
+import java.nio.ByteBuffer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -439,13 +439,13 @@ public class BasicContentHeaderProperties implements CommonContentHeaderProperti
             if ((_propertyFlags & (CONTENT_TYPE_MASK)) != 0)
             {
                 byte length = buffer.get();
-                buffer.skip(length);
+                buffer.position(buffer.position() + length);
             }
 
             if ((_propertyFlags & ENCONDING_MASK) != 0)
             {
                 byte length = buffer.get();
-                buffer.skip(length);
+                buffer.position(buffer.position() + length);
             }
 
             if ((_propertyFlags & HEADERS_MASK) != 0)
@@ -561,7 +561,7 @@ public class BasicContentHeaderProperties implements CommonContentHeaderProperti
 
         if (_headers == null)
         {
-            setHeaders(FieldTableFactory.newFieldTable());
+            setHeaders(new FieldTable());
         }
 
         return _headers;

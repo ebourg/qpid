@@ -20,7 +20,7 @@
  */
 package org.apache.qpid.framing;
 
-import org.apache.mina.common.ByteBuffer;
+import java.nio.ByteBuffer;
 
 public class AMQFrame extends AMQDataBlock
 {
@@ -34,12 +34,6 @@ public class AMQFrame extends AMQDataBlock
     {
         _channel = channel;
         _bodyFrame = bodyFrame;
-    }
-
-    public AMQFrame(final ByteBuffer in, final int channel, final long bodySize, final BodyFactory bodyFactory) throws AMQFrameDecodingException
-    {
-        this._channel = channel;
-        this._bodyFrame = bodyFactory.createBody(in,bodySize);
     }
 
     public long getSize()

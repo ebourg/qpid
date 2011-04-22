@@ -20,9 +20,8 @@
  */
 package org.apache.qpid.framing;
 
-import org.apache.mina.common.ByteBuffer;
-
 import java.math.BigDecimal;
+import java.nio.ByteBuffer;
 
 /**
  * AMQType is a type that represents the different possible AMQP field table types. It provides operations for each

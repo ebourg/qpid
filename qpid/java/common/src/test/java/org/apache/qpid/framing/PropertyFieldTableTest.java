@@ -20,12 +20,11 @@
  */
 package org.apache.qpid.framing;
 
+import java.nio.ByteBuffer;
+
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
-import org.apache.mina.common.ByteBuffer;
-
-import org.apache.qpid.AMQInvalidArgumentException;
 import org.apache.qpid.AMQPInvalidClassException;
 
 import org.slf4j.Logger;
@@ -591,7 +590,7 @@ public class PropertyFieldTableTest extends TestCase
 
         buffer.flip();
 
-        long length = buffer.getUnsignedInt();
+        long length = buffer.getInt() & 0xffffffffL;
 
         FieldTable table2 = new FieldTable(buffer, length);
 

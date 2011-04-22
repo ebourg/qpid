@@ -20,7 +20,7 @@
  */
 package org.apache.qpid.framing;
 
-import org.apache.mina.common.ByteBuffer;
+import java.nio.ByteBuffer;
 
 public class ContentBody implements AMQBody
 {
@@ -38,7 +38,7 @@ public class ContentBody implements AMQBody
         {
             payload = buffer.slice();
             payload.limit((int) size);
-            buffer.skip((int) size);
+            buffer.position(buffer.position() + (int) size);
         }
 
     }
@@ -66,7 +66,7 @@ public class ContentBody implements AMQBody
             if(payload.isDirect() || payload.isReadOnly())
             {            
                 ByteBuffer copy = payload.duplicate();
-                buffer.put(copy.rewind());
+                buffer.put((ByteBuffer) copy.rewind());
             }
             else
             {
@@ -81,7 +81,7 @@ public class ContentBody implements AMQBody
         {
             payload = buffer.slice();
             payload.limit((int) size);
-            buffer.skip((int) size);
+            buffer.position(buffer.position() + (int) size);
         }
 
     }
@@ -95,9 +95,6 @@ public class ContentBody implements AMQBody
 
             newPayload.put(payload);
             newPayload.flip();
-
-            //reduce reference count on payload
-            payload.release();
 
             payload = newPayload;
         }

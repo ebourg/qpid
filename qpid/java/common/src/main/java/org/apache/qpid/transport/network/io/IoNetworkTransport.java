@@ -36,14 +36,6 @@ import org.apache.qpid.transport.util.Logger;
 
 public class IoNetworkTransport implements NetworkTransport, IoContext
 {
-    static
-    {
-        org.apache.mina.common.ByteBuffer.setAllocator
-            (new org.apache.mina.common.SimpleByteBufferAllocator());
-        org.apache.mina.common.ByteBuffer.setUseDirectBuffers
-            (Boolean.getBoolean("amqj.enableDirectBuffers"));
-    }
-
     private static final Logger log = Logger.get(IoNetworkTransport.class);
 
     private Socket socket;

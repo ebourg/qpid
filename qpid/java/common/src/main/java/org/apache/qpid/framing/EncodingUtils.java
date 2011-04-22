@@ -20,12 +20,11 @@
  */
 package org.apache.qpid.framing;
 
-import org.apache.mina.common.ByteBuffer;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.Charset;
+import java.nio.ByteBuffer;
 
 public class EncodingUtils
 {
@@ -631,14 +630,14 @@ public class EncodingUtils
 
     public static FieldTable readFieldTable(ByteBuffer buffer) throws AMQFrameDecodingException
     {
-        long length = buffer.getUnsignedInt();
+        long length = buffer.getInt() & 0xffffffffL;
         if (length == 0)
         {
             return null;
         }
         else
         {
-            return FieldTableFactory.newFieldTable(buffer, length);
+            return new FieldTable(buffer, length);
         }
     }
 
@@ -650,7 +649,7 @@ public class EncodingUtils
 
     public static String readShortString(ByteBuffer buffer)
     {
-        short length = buffer.getUnsigned();
+        short length = (short) (buffer.get() & 0xff);
         if (length == 0)
         {
             return null;
@@ -676,7 +675,7 @@ public class EncodingUtils
 
     public static String readLongString(ByteBuffer buffer)
     {
-        long length = buffer.getUnsignedInt();
+        long length = buffer.getInt() & 0xffffffffL;
         if (length == 0)
         {
             return "";
@@ -702,7 +701,7 @@ public class EncodingUtils
 
     public static byte[] readLongstr(ByteBuffer buffer)
     {
-        long length = buffer.getUnsignedInt();
+        long length = buffer.getInt() & 0xffffffffL;
         if (length == 0)
         {
             return null;
@@ -719,7 +718,7 @@ public class EncodingUtils
     public static long readTimestamp(ByteBuffer buffer)
     {
         // Discard msb from AMQ timestamp
-        // buffer.getUnsignedInt();
+        // buffer.getInt() & 0xffffffffL;
         return buffer.getLong();
     }
 
@@ -915,7 +914,7 @@ public class EncodingUtils
 
     public static byte[] readBytes(ByteBuffer buffer)
     {
-        long length = buffer.getUnsignedInt();
+        long length = buffer.getInt() & 0xffffffffL;
         if (length == 0)
         {
             return null;
@@ -965,7 +964,7 @@ public class EncodingUtils
 
     public static long readLongAsShortString(ByteBuffer buffer)
     {
-        short length = buffer.getUnsigned();
+        short length = (short) (buffer.get() & 0xff);
         short pos = 0;
         if (length == 0)
         {
@@ -1012,5 +1011,4 @@ public class EncodingUtils
 
         return l;
     }
-
 }

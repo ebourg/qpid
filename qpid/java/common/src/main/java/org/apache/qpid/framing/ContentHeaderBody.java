@@ -20,7 +20,7 @@
  */
 package org.apache.qpid.framing;
 
-import org.apache.mina.common.ByteBuffer;
+import java.nio.ByteBuffer;
 
 public class ContentHeaderBody implements AMQBody
 {
@@ -42,10 +42,10 @@ public class ContentHeaderBody implements AMQBody
 
     public ContentHeaderBody(ByteBuffer buffer, long size) throws AMQFrameDecodingException
     {
-        classId = buffer.getUnsignedShort();
-        weight = buffer.getUnsignedShort();
+        classId = buffer.getChar();
+        weight = buffer.getChar();
         bodySize = buffer.getLong();
-        int propertyFlags = buffer.getUnsignedShort();
+        int propertyFlags = buffer.getChar();
         ContentHeaderPropertiesFactory factory = ContentHeaderPropertiesFactory.getInstance();
         properties = factory.createContentHeaderProperties(classId, propertyFlags, buffer, (int)size - 14);
 
